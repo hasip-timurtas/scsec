@@ -15,16 +15,16 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 
 ### Installation
 
+#### From Crates.io (Recommended)
+```bash
+cargo install scsec
+```
+
 #### From Source
 ```bash
 git clone https://github.com/hasip-timurtas/scsec.git
 cd scsec
 cargo install --path .
-```
-
-#### From Crates.io (Coming Soon)
-```bash
-cargo install scsec
 ```
 
 ### Basic Usage
