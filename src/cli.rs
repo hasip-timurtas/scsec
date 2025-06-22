@@ -9,7 +9,7 @@ use crate::plugin::{PluginAction, PluginManager};
 use crate::report::{ReportFormat, ReportGenerator};
 
 #[derive(Parser)]
-#[command(name = "scsec")]
+#[command(name = "solsec")]
 #[command(about = "Solana Smart Contract Security Toolkit")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(author = "Hasip Timurtas")]
@@ -31,7 +31,7 @@ pub enum Commands {
         config: Option<PathBuf>,
 
         /// Output directory for results
-        #[arg(short, long, default_value = "./scsec-results")]
+        #[arg(short, long, default_value = "./solsec-results")]
         output: PathBuf,
 
         /// Output format

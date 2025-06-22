@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     info!(
-        "Starting Solana Smart Contract Security Toolkit (scsec) v{}",
+        "Starting Solana Smart Contract Security Toolkit (solsec) v{}",
         env!("CARGO_PKG_VERSION")
     );
 

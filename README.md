@@ -1,4 +1,4 @@
-# 🛡️ Solana Smart Contract Security Toolkit (scsec)
+# 🛡️ Solana Smart Contract Security Toolkit (solsec)
 
 A comprehensive security analysis tool for Solana smart contracts that helps developers identify vulnerabilities before deployment through static analysis and fuzz testing.
 
@@ -17,13 +17,13 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 
 #### From Crates.io (Recommended)
 ```bash
-cargo install scsec
+cargo install solsec
 ```
 
 #### From Source
 ```bash
-git clone https://github.com/hasip-timurtas/scsec.git
-cd scsec
+git clone https://github.com/hasip-timurtas/solsec.git
+cd solsec
 cargo install --path .
 ```
 
@@ -31,42 +31,42 @@ cargo install --path .
 
 ```bash
 # Scan a Solana program for security issues
-scsec scan ./my-solana-program --output ./results
+solsec scan ./my-solana-program --output ./results
 
 # Run fuzz testing
-scsec fuzz ./my-solana-program --timeout 300
+solsec fuzz ./my-solana-program --timeout 300
 
 # Generate an HTML report
-scsec report ./results --output report.html --format html
+solsec report ./results --output report.html --format html
 ```
 
 ## 📖 Commands
 
-### `scsec scan`
+### `solsec scan`
 
 Run static analysis on your Solana smart contracts.
 
 ```bash
-scsec scan <PATH> [OPTIONS]
+solsec scan <PATH> [OPTIONS]
 
 OPTIONS:
     -c, --config <FILE>          Configuration file path
-    -o, --output <DIR>           Output directory [default: ./scsec-results]
+    -o, --output <DIR>           Output directory [default: ./solsec-results]
     -f, --format <FORMAT>        Output format [default: json] [possible values: json, html, markdown, csv]
         --fail-on-critical       Exit with non-zero code on critical issues [default: true]
 
 EXAMPLES:
-    scsec scan ./programs/my-program
-    scsec scan ./programs --config scsec.toml --output ./security-results
-    scsec scan ./target/idl/my_program.json --format html
+    solsec scan ./programs/my-program
+    solsec scan ./programs --config solsec.toml --output ./security-results
+    solsec scan ./target/idl/my_program.json --format html
 ```
 
-### `scsec fuzz`
+### `solsec fuzz`
 
 Run fuzz testing on smart contracts.
 
 ```bash
-scsec fuzz <PATH> [OPTIONS]
+solsec fuzz <PATH> [OPTIONS]
 
 OPTIONS:
     -t, --timeout <SECONDS>      Timeout in seconds [default: 300]
@@ -74,33 +74,33 @@ OPTIONS:
     -o, --output <DIR>           Output directory [default: ./fuzz-results]
 
 EXAMPLES:
-    scsec fuzz ./programs/my-program --timeout 600 --jobs 4
-    scsec fuzz ./programs --output ./custom-fuzz-results
+    solsec fuzz ./programs/my-program --timeout 600 --jobs 4
+    solsec fuzz ./programs --output ./custom-fuzz-results
 ```
 
-### `scsec report`
+### `solsec report`
 
 Generate human-readable reports from analysis results.
 
 ```bash
-scsec report <RESULTS> [OPTIONS]
+solsec report <RESULTS> [OPTIONS]
 
 OPTIONS:
     -o, --output <FILE>          Output file path [default: ./report.html]
     -f, --format <FORMAT>        Report format [default: html] [possible values: json, html, markdown, csv]
 
 EXAMPLES:
-    scsec report ./scsec-results
-    scsec report ./results --output security-report.md --format markdown
-    scsec report ./results --format csv > issues.csv
+    solsec report ./solsec-results
+    solsec report ./results --output security-report.md --format markdown
+    solsec report ./results --format csv > issues.csv
 ```
 
-### `scsec plugin`
+### `solsec plugin`
 
 Manage security rule plugins.
 
 ```bash
-scsec plugin <ACTION> [PATH]
+solsec plugin <ACTION> [PATH]
 
 ACTIONS:
     list      List available plugins
@@ -108,14 +108,14 @@ ACTIONS:
     unload    Unload a plugin
 
 EXAMPLES:
-    scsec plugin list
-    scsec plugin load ./my-custom-rule.so
-    scsec plugin unload my-custom-rule
+    solsec plugin list
+    solsec plugin load ./my-custom-rule.so
+    solsec plugin unload my-custom-rule
 ```
 
 ## 🔧 Configuration
 
-Create a `scsec.toml` configuration file:
+Create a `solsec.toml` configuration file:
 
 ```toml
 # Enable/disable specific rules
@@ -151,7 +151,7 @@ required_for_instructions = ["transfer", "withdraw"]
 Create custom security rules by implementing the `Rule` trait:
 
 ```rust
-use scsec::plugin::{Rule, RuleResult, Severity};
+use solsec::plugin::{Rule, RuleResult, Severity};
 use std::path::Path;
 use anyhow::Result;
 
@@ -233,15 +233,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install scsec
+    - name: Install solsec
       run: |
-        curl -L https://github.com/hasip-timurtas/scsec/releases/latest/download/scsec-linux-x86_64.tar.gz | tar xz
-        sudo mv scsec /usr/local/bin/
+        curl -L https://github.com/hasip-timurtas/solsec/releases/latest/download/solsec-linux-x86_64.tar.gz | tar xz
+        sudo mv solsec /usr/local/bin/
     
     - name: Run security scan
       run: |
-        scsec scan ./programs --output ./security-results --format json
-        scsec report ./security-results --output ./security-report.html
+        solsec scan ./programs --output ./security-results --format json
+        solsec report ./security-results --output ./security-report.html
     
     - name: Upload security report
       uses: actions/upload-artifact@v3
@@ -269,13 +269,13 @@ jobs:
 # .git/hooks/pre-commit
 
 echo "🛡️ Running security scan..."
-scsec scan ./programs --format json --output ./tmp-security-results
+solsec scan ./programs --format json --output ./tmp-security-results
 
 if [ -f ./tmp-security-results/*.json ]; then
     critical_count=$(jq '[.[] | select(.severity == "critical")] | length' ./tmp-security-results/*.json 2>/dev/null || echo "0")
     if [ "$critical_count" -gt 0 ]; then
         echo "❌ Critical security issues found! Commit blocked."
-        echo "Run 'scsec scan ./programs' to see details."
+        echo "Run 'solsec scan ./programs' to see details."
         rm -rf ./tmp-security-results
         exit 1
     fi
@@ -311,8 +311,8 @@ Developer-friendly format for:
 ### Building from Source
 
 ```bash
-git clone https://github.com/hasip-timurtas/scsec.git
-cd scsec
+git clone https://github.com/hasip-timurtas/solsec.git
+cd solsec
 cargo build --release
 ```
 
@@ -340,8 +340,8 @@ Check out the [`examples/`](./examples/) directory for:
 
 ## 🤝 Community
 
-- **Issues**: [GitHub Issues](https://github.com/hasip-timurtas/scsec/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/hasip-timurtas/scsec/discussions)
+- **Issues**: [GitHub Issues](https://github.com/hasip-timurtas/solsec/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/hasip-timurtas/solsec/discussions)
 - **Discord**: [Solana Security Community](https://discord.gg/solana-security)
 
 ## 📄 License

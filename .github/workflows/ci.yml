@@ -76,18 +76,18 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cargo-
     
-    - name: Build scsec
+    - name: Build solsec
       run: cargo build --release
-    
+
     - name: Run security scan on self
       run: |
         mkdir -p ./security-results
-        ./target/release/scsec scan ./src --output ./security-results/analysis.json --format json
+        ./target/release/solsec scan ./src --output ./security-results/analysis.json --format json
       continue-on-error: true
     
     - name: Generate security report
       run: |
-        ./target/release/scsec report ./security-results --output ./security-report.html --format html
+        ./target/release/solsec report ./security-results --output ./security-report.html --format html
       continue-on-error: true
     
     - name: Upload security report
@@ -176,12 +176,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cargo-fuzz-
     
-    - name: Build scsec
+    - name: Build solsec
       run: cargo build --release
     
     - name: Run fuzz testing
       run: |
-        ./target/release/scsec fuzz ./src --timeout 60 --jobs 2 --output ./fuzz-results
+        ./target/release/solsec fuzz ./src --timeout 60 --jobs 2 --output ./fuzz-results
       continue-on-error: true
     
     - name: Upload fuzz results
@@ -222,21 +222,21 @@ jobs:
     - name: Build release binaries
       run: |
         cargo build --release
-        strip target/release/scsec
+        strip target/release/solsec
     
     - name: Create release archive
       run: |
         mkdir -p release
-        cp target/release/scsec release/
+        cp target/release/solsec release/
         cp README.md release/
         cp LICENSE release/ || echo "No LICENSE file found"
-        tar -czf scsec-linux-x86_64.tar.gz -C release .
+        tar -czf solsec-linux-x86_64.tar.gz -C release .
     
     - name: Upload release artifacts
       uses: actions/upload-artifact@v4
       with:
         name: release-binaries
         path: |
-          scsec-linux-x86_64.tar.gz
-          target/release/scsec
+          solsec-linux-x86_64.tar.gz
+          target/release/solsec
         retention-days: 90 

@@ -1,16 +1,16 @@
 [package]
-name = "scsec"
-version = "0.1.1"
+name = "solsec"
+version = "0.1.0"
 edition = "2021"
 description = "Solana Smart Contract Security Toolkit - Find security bugs before deployment"
 authors = ["Hasip Timurtas"]
 license = "MIT"
-repository = "https://github.com/hasip-timurtas/scsec"
+repository = "https://github.com/hasip-timurtas/solsec"
 keywords = ["solana", "security", "smart-contracts", "static-analysis", "fuzzing"]
 categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
-name = "scsec"
+name = "solsec"
 path = "src/main.rs"
 
 [dependencies]
