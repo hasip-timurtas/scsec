@@ -2,11 +2,11 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use clap::ValueEnum;
 use handlebars::Handlebars;
-use log::{debug, info};
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::analyzer::AnalysisResult;
 use crate::fuzz::FuzzResult;
@@ -110,7 +110,7 @@ impl ReportGenerator {
                 let entry = entry?;
                 let path = entry.path();
 
-                if path.extension().map_or(false, |ext| ext == "json") {
+                if path.extension().is_some_and(|ext| ext == "json") {
                     let filename = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
                     if filename.contains("analysis") || filename.contains("scan") {
@@ -496,7 +496,7 @@ impl Default for ReportGenerator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::tempdir;
+
 
     #[test]
     fn test_report_generator_creation() {

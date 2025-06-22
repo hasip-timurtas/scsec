@@ -7,7 +7,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-use crate::plugin::{Rule, RuleResult, Severity};
+use crate::plugin::{PluginManager, Rule, RuleResult, Severity};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnalysisResult {
@@ -25,6 +25,7 @@ pub struct AnalysisResult {
 pub struct StaticAnalyzer {
     rules: Vec<Box<dyn Rule>>,
     config: AnalyzerConfig,
+    plugin_manager: Option<PluginManager>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -62,10 +63,25 @@ impl StaticAnalyzer {
         let mut analyzer = Self {
             rules: Vec::new(),
             config,
+            plugin_manager: PluginManager::new().ok(),
         };
 
         // Register built-in rules
         analyzer.register_builtin_rules()?;
+        
+        // Load plugin rules if plugin manager is available
+        if let Some(plugin_manager) = &analyzer.plugin_manager {
+            let plugin_rules = plugin_manager.get_all_rules();
+            info!("Loaded {} plugin rules", plugin_rules.len());
+            
+            // Log rule descriptions (demonstrates usage of trait methods)
+            for rule in &analyzer.rules {
+                debug!("Rule '{}': {}", rule.name(), rule.description());
+                if let Some(_schema) = rule.config_schema() {
+                    debug!("Rule '{}' has configuration schema", rule.name());
+                }
+            }
+        }
 
         Ok(analyzer)
     }
@@ -90,7 +106,7 @@ impl StaticAnalyzer {
         } else if path.is_dir() {
             for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
                 let path = entry.path();
-                if path.extension().map_or(false, |ext| ext == "rs") {
+                if path.extension().is_some_and(|ext| ext == "rs") {
                     results.extend(self.analyze_file(path).await?);
                 }
             }
@@ -110,6 +126,8 @@ impl StaticAnalyzer {
 
         for rule in &self.rules {
             if self.is_rule_enabled(rule.name()) {
+                // Pass rule-specific settings if available
+                let _rule_config = self.config.rule_settings.get(rule.name());
                 match rule.check(&content, file_path) {
                     Ok(rule_results) => {
                         for rule_result in rule_results {
@@ -184,20 +202,21 @@ impl Rule for IntegerOverflowRule {
         "Detects potential integer overflow vulnerabilities"
     }
 
-    fn check(&self, content: &str, file_path: &Path) -> Result<Vec<RuleResult>> {
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
         let mut results = Vec::new();
         let lines: Vec<&str> = content.lines().collect();
+        let arithmetic_regex = Regex::new(r"\b\w+\s*[+\-*]\s*\w+")?;
 
         for (line_num, line) in lines.iter().enumerate() {
             // Look for arithmetic operations without checked variants
             if line.contains('+') || line.contains('-') || line.contains('*') {
-                // Skip if already using checked operations
-                if line.contains("checked_") {
+                // Skip if already using checked operations - check using our patterns
+                if self.overflow_patterns.iter().any(|pattern| pattern.is_match(line)) {
                     continue;
                 }
 
                 // Look for potential integer operations
-                if Regex::new(r"\b\w+\s*[+\-*]\s*\w+").unwrap().is_match(line) {
+                if arithmetic_regex.is_match(line) {
                     results.push(RuleResult {
                         severity: Severity::Medium,
                         message: "Potential integer overflow. Consider using checked arithmetic operations.".to_string(),

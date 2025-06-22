@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -91,7 +91,7 @@ impl FuzzEngine {
 
             let target_result = timeout(
                 Duration::from_secs(timeout_secs),
-                self.run_single_target(&target, jobs),
+                self.run_single_target(target, jobs),
             )
             .await;
 
@@ -162,7 +162,7 @@ impl FuzzEngine {
             if let Ok(entries) = fs::read_dir(&location) {
                 for entry in entries.flatten() {
                     let path = entry.path();
-                    if path.extension().map_or(false, |ext| ext == "json") {
+                    if path.extension().is_some_and(|ext| ext == "json") {
                         if let Ok(content) = fs::read_to_string(&path) {
                             // Basic check if it looks like an IDL
                             if content.contains("instructions") && content.contains("accounts") {
@@ -184,12 +184,13 @@ impl FuzzEngine {
             serde_json::from_str(idl_content).with_context(|| "Failed to parse IDL JSON")?;
 
         if let Some(instructions) = idl.get("instructions").and_then(|i| i.as_array()) {
-            for (idx, instruction) in instructions.iter().enumerate() {
+            for instruction in instructions.iter() {
                 if let Some(name) = instruction.get("name").and_then(|n| n.as_str()) {
+                    let entry_point = name.to_string();
                     let target = FuzzTarget {
                         name: format!("fuzz_instruction_{}", name),
-                        entry_point: name.to_string(),
-                        harness_code: self.generate_instruction_harness(name, instruction)?,
+                        entry_point: entry_point.clone(),
+                        harness_code: self.generate_instruction_harness(&entry_point, instruction)?,
                     };
                     self.targets.push(target);
                 }
@@ -227,16 +228,16 @@ fuzz_target!(|data: FuzzData| {{
 }});
 
 fn fuzz_instruction_call(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {{
-    // TODO: Implement actual instruction fuzzing
+    // TODO: Implement actual instruction fuzzing for: {}
     // This would involve:
     // 1. Setting up program context
-    // 2. Creating accounts with fuzzed data
-    // 3. Calling the instruction
+    // 2. Creating accounts with fuzzed data  
+    // 3. Calling the {} instruction
     // 4. Checking for panics/errors
     Ok(())
 }}
 "#,
-            instruction_name
+            instruction_name, instruction_name, instruction_name
         );
 
         Ok(harness)
@@ -252,7 +253,7 @@ fn fuzz_instruction_call(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>>
             let entry = entry?;
             let path = entry.path();
 
-            if path.extension().map_or(false, |ext| ext == "rs") {
+            if path.extension().is_some_and(|ext| ext == "rs") {
                 if let Some(name) = path.file_stem().and_then(|n| n.to_str()) {
                     let content = fs::read_to_string(&path)?;
                     let target = FuzzTarget {
@@ -302,7 +303,7 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
     async fn ensure_cargo_fuzz_installed(&self) -> Result<()> {
         debug!("Checking if cargo-fuzz is installed");
 
-        let output = Command::new("cargo").args(&["fuzz", "--version"]).output();
+        let output = Command::new("cargo").args(["fuzz", "--version"]).output();
 
         match output {
             Ok(output) if output.status.success() => {
@@ -312,7 +313,7 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
             _ => {
                 info!("Installing cargo-fuzz...");
                 let status = Command::new("cargo")
-                    .args(&["install", "cargo-fuzz"])
+                    .args(["install", "cargo-fuzz"])
                     .status()
                     .with_context(|| "Failed to run cargo install")?;
 
@@ -332,7 +333,7 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
         if !fuzz_dir.exists() {
             info!("Initializing fuzz directory");
             let status = Command::new("cargo")
-                .args(&["fuzz", "init"])
+                .args(["fuzz", "init"])
                 .current_dir(&self.program_path)
                 .status()
                 .with_context(|| "Failed to initialize cargo-fuzz")?;
@@ -358,10 +359,10 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     async fn run_single_target(&self, target: &FuzzTarget, jobs: usize) -> Result<FuzzResult> {
-        info!("Running fuzz target: {}", target.name);
+        info!("Running fuzz target: {} (entry point: {})", target.name, target.entry_point);
 
         let output = Command::new("cargo")
-            .args(&[
+            .args([
                 "fuzz",
                 "run",
                 &target.name,
@@ -453,6 +454,7 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
 mod tests {
     use super::*;
     use tempfile::tempdir;
+
 
     #[test]
     fn test_fuzz_engine_creation() {

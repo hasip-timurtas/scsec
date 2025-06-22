@@ -104,7 +104,7 @@ impl PluginManager {
         let mut plugins = Vec::new();
 
         // Add loaded plugins
-        for (_, handle) in &self.plugins {
+        for handle in self.plugins.values() {
             plugins.push(handle.info.clone());
         }
 
@@ -116,7 +116,7 @@ impl PluginManager {
 
                 if path
                     .extension()
-                    .map_or(false, |ext| ext == "so" || ext == "dll" || ext == "dylib")
+                    .is_some_and(|ext| ext == "so" || ext == "dll" || ext == "dylib")
                 {
                     // Try to read plugin metadata without loading
                     if let Ok(info) = self.read_plugin_info(&path) {
@@ -263,6 +263,7 @@ impl Rule for ExampleCustomRule {
 
 // Plugin interface functions that plugins must implement
 #[no_mangle]
+#[allow(improper_ctypes_definitions)]
 pub extern "C" fn get_plugin_info() -> PluginInfo {
     PluginInfo {
         name: "example_plugin".to_string(),
@@ -274,6 +275,7 @@ pub extern "C" fn get_plugin_info() -> PluginInfo {
 }
 
 #[no_mangle]
+#[allow(improper_ctypes_definitions)]
 pub extern "C" fn create_rules() -> Vec<Box<dyn Rule>> {
     vec![Box::new(ExampleCustomRule)]
 }
@@ -281,7 +283,7 @@ pub extern "C" fn create_rules() -> Vec<Box<dyn Rule>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::tempdir;
+
 
     #[test]
     fn test_example_custom_rule() {
