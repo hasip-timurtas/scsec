@@ -1,0 +1,61 @@
+[package]
+name = "scsec"
+version = "0.1.0"
+edition = "2021"
+description = "Solana Smart Contract Security Toolkit - Find security bugs before deployment"
+authors = ["Hasip Timurtas"]
+license = "MIT"
+repository = "https://github.com/hasip-timurtas/scsec"
+keywords = ["solana", "security", "smart-contracts", "static-analysis", "fuzzing"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "scsec"
+path = "src/main.rs"
+
+[dependencies]
+# CLI and argument parsing
+clap = { version = "4.4", features = ["derive", "cargo"] }
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+# File system operations
+walkdir = "2.3"
+# Pattern matching and regex
+regex = "1.10"
+# Logging
+env_logger = "0.10"
+log = "0.4"
+# Template engine for HTML reports
+handlebars = "4.5"
+# Process execution
+tokio-process = "0.2"
+# Configuration
+config = "0.13"
+# Plugin system
+libloading = "0.8"
+# Hash and crypto utilities
+sha2 = "0.10"
+# Date and time
+chrono = { version = "0.4", features = ["serde"] }
+# HTTP client for fetching IDLs
+reqwest = { version = "0.11", features = ["json"] }
+# TOML parsing
+toml = "0.8"
+# Directory utilities
+dirs = "5.0"
+
+[dev-dependencies]
+tempfile = "3.8"
+pretty_assertions = "1.4"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true 

@@ -1,0 +1,113 @@
+# Example scsec configuration file
+# Copy this to scsec.toml and customize for your project
+
+# Global settings
+[global]
+# Scan timeout in seconds (0 = no timeout)
+timeout = 300
+
+# Number of parallel workers for analysis
+workers = 4
+
+# Minimum severity level to report (low, medium, high, critical)
+min_severity = "medium"
+
+# Rules configuration
+[rules]
+# Enable/disable specific rules
+enabled_rules = [
+    "integer_overflow",
+    "missing_signer_check", 
+    "unchecked_account",
+    "reentrancy"
+]
+
+disabled_rules = [
+    # Add rules to disable here
+    # "example_rule"
+]
+
+# Rule-specific settings
+[rule_settings]
+
+[rule_settings.integer_overflow]
+# Ignore patterns for files/functions
+ignore_patterns = [
+    "test_*",
+    "mock_*",
+    "*_test.rs"
+]
+# Enable more aggressive checking
+strict_mode = false
+
+[rule_settings.missing_signer_check]
+# Instructions that must have signer validation
+required_for_instructions = [
+    "transfer",
+    "withdraw",
+    "mint",
+    "burn"
+]
+# Allow certain patterns to bypass the check
+bypass_patterns = [
+    "initialize",
+    "create_account"
+]
+
+[rule_settings.unchecked_account]
+# Accounts that are commonly safe to use unchecked
+safe_account_types = [
+    "SystemProgram",
+    "TokenProgram",
+    "AssociatedTokenProgram"
+]
+
+[rule_settings.reentrancy]
+# Cross-program invocation patterns to check
+check_patterns = [
+    "invoke",
+    "invoke_signed",
+    "cpi"
+]
+
+# Output configuration
+[output]
+# Default output directory
+directory = "./scsec-results"
+
+# Default report format (json, html, markdown, csv)
+format = "json"
+
+# Include source code snippets in reports
+include_snippets = true
+
+# Maximum length of code snippets
+max_snippet_length = 200
+
+# Fuzz testing configuration
+[fuzz]
+# Default timeout for fuzzing in seconds
+timeout = 300
+
+# Default number of parallel jobs
+jobs = 2
+
+# Corpus directory for fuzz inputs
+corpus_dir = "./fuzz/corpus"
+
+# Artifacts directory for crashes
+artifacts_dir = "./fuzz/artifacts"
+
+# Plugin configuration
+[plugins]
+# Directory to search for plugins
+plugin_dir = "~/.config/scsec/plugins"
+
+# Auto-load plugins from plugin directory
+auto_load = true
+
+# Specific plugins to load
+load = [
+    # "custom_rule.so",
+    # "advanced_checks.dll"
+] 
