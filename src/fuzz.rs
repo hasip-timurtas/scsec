@@ -346,6 +346,17 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
 
         // Create/update target files
         let targets_dir = fuzz_dir.join("fuzz_targets");
+
+        // Ensure fuzz_targets directory exists
+        if !targets_dir.exists() {
+            fs::create_dir_all(&targets_dir).with_context(|| {
+                format!(
+                    "Failed to create fuzz targets directory: {}",
+                    targets_dir.display()
+                )
+            })?;
+        }
+
         for target in &self.targets {
             let target_file = targets_dir.join(format!("{}.rs", target.name));
             if !target_file.exists() {
