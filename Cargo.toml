@@ -1,6 +1,6 @@
 [package]
 name = "scsec"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Solana Smart Contract Security Toolkit - Find security bugs before deployment"
 authors = ["Hasip Timurtas"]
