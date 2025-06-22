@@ -101,7 +101,7 @@ artifacts_dir = "./fuzz/artifacts"
 # Plugin configuration
 [plugins]
 # Directory to search for plugins
-plugin_dir = "~/.config/scsec/plugins"
+plugin_dir = "~/.config/solsec/plugins"
 
 # Auto-load plugins from plugin directory
 auto_load = true

@@ -81,7 +81,7 @@ impl PluginManager {
     pub fn new() -> Result<Self> {
         let plugin_dir = dirs::config_dir()
             .unwrap_or_else(|| PathBuf::from("."))
-            .join("scsec")
+            .join("solsec")
             .join("plugins");
 
         // Create plugin directory if it doesn't exist
@@ -268,7 +268,7 @@ pub extern "C" fn get_plugin_info() -> PluginInfo {
     PluginInfo {
         name: "example_plugin".to_string(),
         version: "1.0.0".to_string(),
-        description: "Example security plugin for scsec".to_string(),
+        description: "Example security plugin for solsec".to_string(),
         author: "Hasip Timurtas".to_string(),
         rules: vec!["example_custom_rule".to_string()],
     }

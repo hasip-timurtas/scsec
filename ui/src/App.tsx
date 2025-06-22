@@ -18,7 +18,7 @@ interface SecurityIssue {
 interface SecurityReport {
   metadata: {
     generated_at: string;
-    scsec_version: string;
+    solsec_version: string;
     total_files_scanned: number;
   };
   summary: {
@@ -149,7 +149,7 @@ const App: React.FC = () => {
     const mockReport: SecurityReport = {
       metadata: {
         generated_at: new Date().toISOString(),
-        scsec_version: "0.1.0",
+        solsec_version: "0.1.1",
         total_files_scanned: 12,
       },
       summary: {

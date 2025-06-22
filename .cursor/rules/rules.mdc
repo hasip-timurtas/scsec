@@ -11,7 +11,7 @@ file_patterns:
 
 ## Project Overview
 
-**scsec** (Solana Smart Contract Security Toolkit) is a comprehensive Rust-based CLI tool for analyzing Solana smart contracts for security vulnerabilities. The project includes static analysis, fuzz testing, reporting capabilities, a plugin system, and an optional React-based UI.
+**solsec** (Solana Smart Contract Security Toolkit) is a comprehensive Rust-based CLI tool for analyzing Solana smart contracts for security vulnerabilities. The project includes static analysis, fuzz testing, reporting capabilities, a plugin system, and an optional React-based UI.
 
 ## Project Structure
 
@@ -39,10 +39,10 @@ solana-smart-contract-security-toolkit/
 
 ### CLI Commands
 
-1. **`scsec scan`** - Static analysis of Solana programs
-2. **`scsec fuzz`** - Automated fuzz testing with IDL generation
-3. **`scsec report`** - Generate reports in multiple formats (JSON, HTML, Markdown, CSV)
-4. **`scsec plugin`** - Manage security rule plugins
+1. **`solsec scan`** - Static analysis of Solana programs
+2. **`solsec fuzz`** - Automated fuzz testing with IDL generation
+3. **`solsec report`** - Generate reports in multiple formats (JSON, HTML, Markdown, CSV)
+4. **`solsec plugin`** - Manage security rule plugins
 
 ### Built-in Security Rules
 
@@ -164,12 +164,12 @@ if self.overflow_patterns.iter().any(|pattern| pattern.is_match(line)) {
 ### Author and Repository
 
 - **Author**: Hasip Timurtas
-- **Repository**: `https://github.com/hasip-timurtas/scsec`
+- **Repository**: `https://github.com/hasip-timurtas/solsec`
 - **License**: MIT
 
 ### Version Management
 
-- **Cargo.toml version**: 0.1.0
+- **Cargo.toml version**: 0.1.1
 - **Rust edition**: 2021
 - **MSRV**: Not specified (use latest stable)
 
