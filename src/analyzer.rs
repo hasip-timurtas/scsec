@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use log::{debug, info, warn};
+use log::{debug, error, info, warn};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -97,19 +97,42 @@ impl StaticAnalyzer {
     pub async fn analyze_path(&mut self, path: &Path) -> Result<Vec<AnalysisResult>> {
         let mut results = Vec::new();
 
+        // Check if path exists first
+        if !path.exists() {
+            error!("Path does not exist: {}", path.display());
+            anyhow::bail!("Path does not exist: {}", path.display());
+        }
+
         if path.is_file() {
             if let Some(ext) = path.extension() {
                 if ext == "rs" {
                     results.extend(self.analyze_file(path).await?);
+                } else {
+                    warn!("File is not a Rust source file (.rs): {}", path.display());
                 }
+            } else {
+                warn!("File has no extension: {}", path.display());
             }
         } else if path.is_dir() {
+            let mut rust_files_found = 0;
             for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
-                let path = entry.path();
-                if path.extension().is_some_and(|ext| ext == "rs") {
-                    results.extend(self.analyze_file(path).await?);
+                let entry_path = entry.path();
+                if entry_path.extension().is_some_and(|ext| ext == "rs") {
+                    rust_files_found += 1;
+                    results.extend(self.analyze_file(entry_path).await?);
                 }
             }
+            if rust_files_found == 0 {
+                warn!(
+                    "No Rust source files (.rs) found in directory: {}",
+                    path.display()
+                );
+            } else {
+                info!("Analyzed {} Rust files", rust_files_found);
+            }
+        } else {
+            error!("Path is neither a file nor a directory: {}", path.display());
+            anyhow::bail!("Path is neither a file nor a directory: {}", path.display());
         }
 
         info!("Static analysis completed. Found {} issues", results.len());

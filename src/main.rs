@@ -13,8 +13,10 @@ use cli::{Cli, Commands};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Initialize logger
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    // Initialize logger with colored output
+    env_logger::Builder::from_env(Env::default().default_filter_or("info"))
+        .write_style(env_logger::WriteStyle::Auto)
+        .init();
 
     let cli = Cli::parse();
 
