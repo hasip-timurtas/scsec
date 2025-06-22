@@ -497,7 +497,6 @@ impl Default for ReportGenerator {
 mod tests {
     use super::*;
 
-
     #[test]
     fn test_report_generator_creation() {
         let generator = ReportGenerator::new();

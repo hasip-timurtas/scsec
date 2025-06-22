@@ -68,12 +68,12 @@ impl StaticAnalyzer {
 
         // Register built-in rules
         analyzer.register_builtin_rules()?;
-        
+
         // Load plugin rules if plugin manager is available
         if let Some(plugin_manager) = &analyzer.plugin_manager {
             let plugin_rules = plugin_manager.get_all_rules();
             info!("Loaded {} plugin rules", plugin_rules.len());
-            
+
             // Log rule descriptions (demonstrates usage of trait methods)
             for rule in &analyzer.rules {
                 debug!("Rule '{}': {}", rule.name(), rule.description());
@@ -211,7 +211,11 @@ impl Rule for IntegerOverflowRule {
             // Look for arithmetic operations without checked variants
             if line.contains('+') || line.contains('-') || line.contains('*') {
                 // Skip if already using checked operations - check using our patterns
-                if self.overflow_patterns.iter().any(|pattern| pattern.is_match(line)) {
+                if self
+                    .overflow_patterns
+                    .iter()
+                    .any(|pattern| pattern.is_match(line))
+                {
                     continue;
                 }
 

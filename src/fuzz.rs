@@ -190,7 +190,8 @@ impl FuzzEngine {
                     let target = FuzzTarget {
                         name: format!("fuzz_instruction_{}", name),
                         entry_point: entry_point.clone(),
-                        harness_code: self.generate_instruction_harness(&entry_point, instruction)?,
+                        harness_code: self
+                            .generate_instruction_harness(&entry_point, instruction)?,
                     };
                     self.targets.push(target);
                 }
@@ -359,7 +360,10 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     async fn run_single_target(&self, target: &FuzzTarget, jobs: usize) -> Result<FuzzResult> {
-        info!("Running fuzz target: {} (entry point: {})", target.name, target.entry_point);
+        info!(
+            "Running fuzz target: {} (entry point: {})",
+            target.name, target.entry_point
+        );
 
         let output = Command::new("cargo")
             .args([
@@ -454,7 +458,6 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
 mod tests {
     use super::*;
     use tempfile::tempdir;
-
 
     #[test]
     fn test_fuzz_engine_creation() {

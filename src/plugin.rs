@@ -284,7 +284,6 @@ pub extern "C" fn create_rules() -> Vec<Box<dyn Rule>> {
 mod tests {
     use super::*;
 
-
     #[test]
     fn test_example_custom_rule() {
         let rule = ExampleCustomRule;
