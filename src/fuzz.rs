@@ -475,8 +475,7 @@ mod tests {
         let program_path = temp_dir.path().to_path_buf();
         let output_dir = temp_dir.path().join("output");
 
-        let mut engine = FuzzEngine::new(program_path, output_dir).unwrap();
-        engine.create_basic_target().unwrap();
+        let engine = FuzzEngine::new(program_path, output_dir).unwrap();
 
         assert_eq!(engine.targets.len(), 1);
         assert_eq!(engine.targets[0].name, "basic_fuzz");

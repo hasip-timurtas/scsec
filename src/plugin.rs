@@ -300,7 +300,7 @@ mod tests {
         "#;
 
         let results = rule.check(content, Path::new("test.rs")).unwrap();
-        assert_eq!(results.len(), 1);
+        assert_eq!(results.len(), 3); // Three lines contain "unsafe": function name, unsafe block, and comment
         assert_eq!(results[0].severity, Severity::Medium);
         assert!(results[0].message.contains("unsafe block"));
     }
