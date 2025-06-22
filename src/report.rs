@@ -115,11 +115,23 @@ impl ReportGenerator {
 
                     if filename.contains("analysis") || filename.contains("scan") {
                         let content = fs::read_to_string(&path)?;
-                        let results: Vec<AnalysisResult> = serde_json::from_str(&content)
-                            .with_context(|| {
-                                format!("Failed to parse analysis results from: {}", path.display())
-                            })?;
-                        analysis_results.extend(results);
+
+                        // Try to parse as SecurityReport first (from scan command)
+                        if let Ok(security_report) =
+                            serde_json::from_str::<SecurityReport>(&content)
+                        {
+                            analysis_results.extend(security_report.analysis_results);
+                        } else {
+                            // Fallback to parsing as Vec<AnalysisResult> (legacy format)
+                            let results: Vec<AnalysisResult> = serde_json::from_str(&content)
+                                .with_context(|| {
+                                    format!(
+                                        "Failed to parse analysis results from: {}",
+                                        path.display()
+                                    )
+                                })?;
+                            analysis_results.extend(results);
+                        }
                     } else if filename.contains("fuzz") {
                         let content = fs::read_to_string(&path)?;
                         fuzz_results = Some(serde_json::from_str(&content).with_context(|| {
