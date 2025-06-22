@@ -178,13 +178,13 @@ pub struct IntegerOverflowRule {
 impl IntegerOverflowRule {
     pub fn new() -> Self {
         let patterns = vec![
-            Regex::new(r"\.checked_add\(").unwrap(),
-            Regex::new(r"\.checked_sub\(").unwrap(),
-            Regex::new(r"\.checked_mul\(").unwrap(),
-            Regex::new(r"\.checked_div\(").unwrap(),
-            Regex::new(r"\+\s*=").unwrap(),
-            Regex::new(r"-\s*=").unwrap(),
-            Regex::new(r"\*\s*=").unwrap(),
+            Regex::new(r"\.checked_add\(").expect("Invalid regex for checked_add"),
+            Regex::new(r"\.checked_sub\(").expect("Invalid regex for checked_sub"),
+            Regex::new(r"\.checked_mul\(").expect("Invalid regex for checked_mul"),
+            Regex::new(r"\.checked_div\(").expect("Invalid regex for checked_div"),
+            Regex::new(r"\+\s*=").expect("Invalid regex for add assignment"),
+            Regex::new(r"-\s*=").expect("Invalid regex for sub assignment"),
+            Regex::new(r"\*\s*=").expect("Invalid regex for mul assignment"),
         ];
 
         Self {

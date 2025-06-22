@@ -299,7 +299,9 @@ mod tests {
             }
         "#;
 
-        let results = rule.check(content, Path::new("test.rs")).unwrap();
+        let results = rule
+            .check(content, Path::new("test.rs"))
+            .expect("Rule check failed");
         assert_eq!(results.len(), 3); // Three lines contain "unsafe": function name, unsafe block, and comment
         assert_eq!(results[0].severity, Severity::Medium);
         assert!(results[0].message.contains("unsafe block"));
@@ -307,7 +309,7 @@ mod tests {
 
     #[test]
     fn test_plugin_manager_creation() {
-        let manager = PluginManager::new().unwrap();
+        let manager = PluginManager::new().expect("Failed to create PluginManager");
         assert!(manager.plugin_dir.exists() || manager.plugin_dir.parent().is_some());
     }
 }
