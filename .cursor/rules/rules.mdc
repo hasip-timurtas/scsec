@@ -1,0 +1,441 @@
+---
+description: 
+globs: **
+alwaysApply: false
+---
+file_patterns:
+  - "**"
+---
+
+# Project Rules and Documentation
+
+## Project Overview
+
+**scsec** (Solana Smart Contract Security Toolkit) is a comprehensive Rust-based CLI tool for analyzing Solana smart contracts for security vulnerabilities. The project includes static analysis, fuzz testing, reporting capabilities, a plugin system, and an optional React-based UI.
+
+## Project Structure
+
+```
+solana-smart-contract-security-toolkit/
+├── src/
+│   ├── main.rs              # CLI entry point
+│   ├── cli.rs               # Command-line interface handling
+│   ├── analyzer.rs          # Static analysis engine with built-in rules
+│   ├── fuzz.rs              # Fuzzing engine with IDL integration
+│   ├── report.rs            # Multi-format report generation
+│   └── plugin.rs            # Plugin system and rule traits
+├── ui/                      # Optional React TypeScript UI
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.ts
+├── .github/workflows/ci.yml # GitHub Actions CI/CD
+├── .git/hooks/pre-commit    # Native git hook for code quality
+├── Cargo.toml
+├── README.md
+└── rules.md                 # This file
+```
+
+## Core Architecture
+
+### CLI Commands
+
+1. **`scsec scan`** - Static analysis of Solana programs
+2. **`scsec fuzz`** - Automated fuzz testing with IDL generation
+3. **`scsec report`** - Generate reports in multiple formats (JSON, HTML, Markdown, CSV)
+4. **`scsec plugin`** - Manage security rule plugins
+
+### Built-in Security Rules
+
+The analyzer includes 4 core security rules:
+
+1. **`integer_overflow`** (Medium) - Detects potential integer overflow vulnerabilities
+2. **`missing_signer_check`** (High) - Identifies missing signer validation
+3. **`unchecked_account`** (Critical) - Finds accounts used without proper validation
+4. **`reentrancy`** (High) - Detects potential reentrancy vulnerabilities
+
+### Plugin System
+
+- **Rule Trait**: All security rules implement the `Rule` trait
+- **Plugin Interface**: FFI-safe plugin loading with `#[no_mangle]` functions
+- **Extensibility**: Custom rules can be loaded as dynamic libraries
+
+## Code Quality Standards
+
+### Clippy Configuration
+
+**CRITICAL**: The project uses `cargo clippy --all-targets --all-features -- -D warnings`
+
+This means ALL clippy warnings are treated as errors. The following practices MUST be followed:
+
+#### Fixed Clippy Issues and Best Practices
+
+1. **Use `is_some_and()` instead of `map_or(false, |x| condition)`**
+   ```rust
+   // ❌ Bad
+   if path.extension().map_or(false, |ext| ext == "rs") {
+   
+   // ✅ Good  
+   if path.extension().is_some_and(|ext| ext == "rs") {
+   ```
+
+2. **Move regex compilation outside loops**
+   ```rust
+   // ❌ Bad - creates regex in every iteration
+   for line in lines {
+       if Regex::new(r"pattern").unwrap().is_match(line) {
+   
+   // ✅ Good - compile once, use many times
+   let regex = Regex::new(r"pattern")?;
+   for line in lines {
+       if regex.is_match(line) {
+   ```
+
+3. **Remove unnecessary borrows in function calls**
+   ```rust
+   // ❌ Bad
+   Command::new("cargo").args(&["test", "arg"])
+   
+   // ✅ Good
+   Command::new("cargo").args(["test", "arg"])
+   ```
+
+4. **Use iterator methods properly**
+   ```rust
+   // ❌ Bad - unnecessary enumerate
+   for (_idx, item) in items.iter().enumerate() {
+   
+   // ✅ Good
+   for item in items.iter() {
+   ```
+
+5. **Handle dead code properly**
+   - **Don't use `#[allow(dead_code)]` as first resort**
+   - **Actually use the code** by integrating it into the system
+   - **Only allow dead code** for FFI interfaces and public APIs meant for external use
+
+### Code Integration Examples
+
+When fixing dead code warnings, integrate functionality:
+
+```rust
+// Example: Using rule_settings field properly
+for rule in &self.rules {
+    let _rule_config = self.config.rule_settings.get(rule.name());
+    // Use rule-specific configuration
+}
+
+// Example: Using overflow_patterns field
+if self.overflow_patterns.iter().any(|pattern| pattern.is_match(line)) {
+    continue; // Skip already safe operations
+}
+```
+
+## Development Workflow
+
+### Git Hooks - Native Approach
+
+**PHILOSOPHY**: Use native git hooks, NOT external frameworks.
+
+**Why native hooks?**
+- ✅ Zero dependencies (no Python, no external packages)
+- ✅ Built into Git
+- ✅ Simple shell script
+- ✅ Project-specific
+- ✅ Easy to debug and modify
+
+**Pre-commit Hook Location**: `.git/hooks/pre-commit`
+
+**What it does**:
+1. Format code with `cargo fmt --all`
+2. Run linting with `cargo clippy --all-targets --all-features -- -D warnings`
+3. Validate build with `cargo check --all-targets`
+4. Auto-add formatted changes to commit
+
+**Setup for new developers**: The hook exists in `.git/hooks/pre-commit` and is executable.
+
+### Rejected Approaches
+
+**❌ Custom Makefiles**: Too much maintenance, platform-specific issues
+**❌ Pre-commit framework**: External Python dependency, overcomplicated for Rust projects
+**❌ Custom shell scripts**: Unnecessary abstraction
+
+## Project Metadata
+
+### Author and Repository
+
+- **Author**: Hasip Timurtas
+- **Repository**: `https://github.com/hasip-timurtas/scsec`
+- **License**: MIT
+
+### Version Management
+
+- **Cargo.toml version**: 0.1.0
+- **Rust edition**: 2021
+- **MSRV**: Not specified (use latest stable)
+
+## UI Component (Optional)
+
+### Technology Stack
+
+- **Framework**: React 18 with TypeScript
+- **Bundler**: Vite
+- **Styling**: Tailwind CSS
+- **Package Manager**: Bun (preferred over npm/yarn)
+
+### UI Architecture
+
+- **Main App**: `ui/src/App.tsx` - Dashboard for security analysis results
+- **Styling**: Tailwind CSS for responsive, modern UI
+- **Build**: Vite for fast development and optimized builds
+
+### UI Configuration Files
+
+```
+ui/
+├── postcss.config.js     # PostCSS configuration for Tailwind
+├── tailwind.config.js    # Tailwind CSS configuration
+├── tsconfig.json        # TypeScript configuration (single file, not split)
+└── vite.config.ts       # Vite bundler configuration
+```
+
+**IMPORTANT**: Use single `tsconfig.json`, avoid `tsconfig.node.json` for simplicity.
+
+## CI/CD Pipeline
+
+### GitHub Actions
+
+Located in `.github/workflows/ci.yml`
+
+**Pipeline steps**:
+1. **Checkout code**
+2. **Setup Rust toolchain**
+3. **Cache dependencies**
+4. **Format check**: `cargo fmt --all -- --check`
+5. **Linting**: `cargo clippy --all-targets --all-features -- -D warnings`
+6. **Tests**: `cargo test`
+7. **Build**: `cargo build --release`
+8. **UI build**: Build React app with Bun
+
+### CI Requirements
+
+- **All clippy warnings must be fixed** (not suppressed)
+- **Code must be formatted** with rustfmt
+- **All tests must pass**
+- **Project must build successfully**
+
+## Security Analysis Engine
+
+### Analyzer Configuration
+
+File: `scsec.toml.example`
+
+```toml
+enabled_rules = [
+    "integer_overflow",
+    "missing_signer_check", 
+    "unchecked_account",
+    "reentrancy"
+]
+
+disabled_rules = []
+
+[rule_settings]
+[rule_settings.integer_overflow]
+ignore_patterns = ["test_*", "mock_*"]
+```
+
+### Rule Implementation Guidelines
+
+When implementing new security rules:
+
+1. **Implement the `Rule` trait**:
+   ```rust
+   impl Rule for MyRule {
+       fn name(&self) -> &str { "my_rule" }
+       fn description(&self) -> &str { "Description" }
+       fn check(&self, content: &str, file_path: &Path) -> Result<Vec<RuleResult>> {
+           // Implementation
+       }
+   }
+   ```
+
+2. **Use proper severity levels**:
+   - `Severity::Low` - Style issues, minor improvements
+   - `Severity::Medium` - Potential issues, should be reviewed
+   - `Severity::High` - Likely security issues
+   - `Severity::Critical` - Definite security vulnerabilities
+
+3. **Provide actionable suggestions**:
+   ```rust
+   RuleResult {
+       severity: Severity::Medium,
+       message: "Clear description of the issue".to_string(),
+       suggestion: Some("Specific action to fix".to_string()),
+       code_snippet: Some(line.trim().to_string()),
+       // ...
+   }
+   ```
+
+## Fuzzing Engine
+
+### IDL Integration
+
+The fuzzing engine automatically:
+1. **Discovers IDL files** in common locations (`target/idl/`, `idl/`, project root)
+2. **Generates fuzz targets** from instruction definitions
+3. **Creates harness code** for each instruction
+4. **Integrates with cargo-fuzz** for execution
+
+### Fuzz Target Generation
+
+For each instruction in an IDL:
+- Creates a target named `fuzz_instruction_{name}`
+- Generates harness with `Arbitrary` derive for input fuzzing
+- Includes TODO comments for manual implementation
+
+## Report Generation
+
+### Supported Formats
+
+1. **JSON** - Machine-readable for CI/CD integration
+2. **HTML** - Beautiful, responsive reports with styling
+3. **Markdown** - Developer-friendly for documentation
+4. **CSV** - Data analysis and spreadsheet import
+
+### Report Structure
+
+```rust
+AnalysisResult {
+    rule_name: String,
+    severity: String,
+    message: String,
+    file_path: String,
+    line_number: Option<usize>,
+    column: Option<usize>,
+    code_snippet: Option<String>,
+    suggestion: Option<String>,
+}
+```
+
+## Development Best Practices
+
+### Memory Safety
+
+- **Use `anyhow::Result` for error handling**
+- **Avoid `unwrap()` in production code** - use proper error propagation
+- **Use `std::path::PathBuf` for file paths** - avoid string manipulation
+
+### Performance
+
+- **Compile regexes once** - store in struct fields, not in loops
+- **Use `walkdir` for directory traversal** - handles symlinks and permissions
+- **Cache analysis results** where possible
+
+### Code Organization
+
+- **Keep commands in `cli.rs`** - separate from business logic
+- **Put analysis logic in `analyzer.rs`** - core security rule engine
+- **Isolate plugin system in `plugin.rs`** - FFI and dynamic loading
+- **Separate reporting in `report.rs`** - output format handling
+
+### Testing
+
+- **Unit tests for each rule** - test positive and negative cases
+- **Integration tests for CLI** - test command-line interface
+- **Mock file systems** - use `tempfile` crate for temporary directories
+
+## Common Pitfalls and Solutions
+
+### 1. Clippy Warnings
+
+**Problem**: CI fails with clippy warnings
+**Solution**: Fix warnings properly, don't suppress with `#[allow]`
+
+### 2. Dead Code
+
+**Problem**: Unused code triggers warnings
+**Solution**: Integrate code into system or remove if truly unnecessary
+
+### 3. FFI Safety
+
+**Problem**: Plugin interface not FFI-safe
+**Solution**: Use `#[allow(improper_ctypes_definitions)]` for plugin boundaries only
+
+### 4. File Path Handling
+
+**Problem**: Cross-platform path issues
+**Solution**: Always use `std::path::Path` and `PathBuf`, never string concatenation
+
+### 5. Regex Performance
+
+**Problem**: Slow analysis due to regex compilation in loops
+**Solution**: Compile regexes once, store in struct fields
+
+## External Dependencies
+
+### Core Dependencies
+
+- **`clap`** - Command-line argument parsing
+- **`tokio`** - Async runtime for concurrent analysis
+- **`serde`** - Serialization for configuration and output
+- **`anyhow`** - Error handling
+- **`log`** - Logging framework
+- **`walkdir`** - Directory traversal
+- **`regex`** - Pattern matching for security rules
+- **`handlebars`** - HTML report templating
+
+### Development Dependencies
+
+- **`tempfile`** - Temporary files for testing
+- **`pretty_assertions`** - Better test failure output
+
+## Future Considerations
+
+### Extensibility
+
+- **Plugin system** allows external security rules
+- **Configuration system** supports rule customization
+- **Report formats** can be extended with new templates
+
+### Performance
+
+- **Parallel analysis** using Tokio for multiple files
+- **Incremental analysis** - only analyze changed files
+- **Caching** of analysis results for large codebases
+
+### Integration
+
+- **IDE plugins** - Language Server Protocol support
+- **GitHub Actions marketplace** - Pre-built action
+- **VS Code extension** - Real-time security analysis
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Clippy fails in CI**
+   - Check all warnings with `cargo clippy --all-targets --all-features -- -D warnings`
+   - Fix issues, don't suppress them
+
+2. **Pre-commit hook not working**
+   - Verify `.git/hooks/pre-commit` exists and is executable
+   - Test manually: `.git/hooks/pre-commit`
+
+3. **UI not loading styles**
+   - Ensure `postcss.config.js` exists for Tailwind CSS processing
+   - Check Vite configuration includes PostCSS
+
+4. **Plugin loading fails**
+   - Verify dynamic library is compiled with correct crate type: `cdylib`
+   - Check FFI function signatures match expected interface
+
+### Debugging Tips
+
+- **Use `RUST_LOG=debug` for detailed analysis output**
+- **Check file permissions** for git hooks and plugins
+- **Verify configuration syntax** with `scsec scan --config path/to/config.toml`
+- **Test individual rules** by enabling only specific rules in configuration
+
+---
+
+This document serves as the comprehensive guide for understanding and contributing to the scsec project. All decisions documented here were made through practical implementation and testing, prioritizing simplicity, reliability, and maintainability over complexity. 
