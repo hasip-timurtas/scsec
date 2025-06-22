@@ -1,8 +1,8 @@
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use clap::ValueEnum;
 use handlebars::Handlebars;
-use log::{info, debug};
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
@@ -66,12 +66,12 @@ pub struct ReportGenerator {
 impl ReportGenerator {
     pub fn new() -> Self {
         let mut handlebars = Handlebars::new();
-        
+
         // Register HTML template
         handlebars
             .register_template_string("html_report", HTML_TEMPLATE)
             .expect("Failed to register HTML template");
-        
+
         // Register Markdown template
         handlebars
             .register_template_string("markdown_report", MARKDOWN_TEMPLATE)
@@ -96,7 +96,10 @@ impl ReportGenerator {
         output_path: &Path,
         format: ReportFormat,
     ) -> Result<()> {
-        info!("Generating report from directory: {}", results_dir.display());
+        info!(
+            "Generating report from directory: {}",
+            results_dir.display()
+        );
 
         // Load analysis results
         let mut analysis_results = Vec::new();
@@ -106,19 +109,22 @@ impl ReportGenerator {
             for entry in fs::read_dir(results_dir)? {
                 let entry = entry?;
                 let path = entry.path();
-                
+
                 if path.extension().map_or(false, |ext| ext == "json") {
                     let filename = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                    
+
                     if filename.contains("analysis") || filename.contains("scan") {
                         let content = fs::read_to_string(&path)?;
                         let results: Vec<AnalysisResult> = serde_json::from_str(&content)
-                            .with_context(|| format!("Failed to parse analysis results from: {}", path.display()))?;
+                            .with_context(|| {
+                                format!("Failed to parse analysis results from: {}", path.display())
+                            })?;
                         analysis_results.extend(results);
                     } else if filename.contains("fuzz") {
                         let content = fs::read_to_string(&path)?;
-                        fuzz_results = Some(serde_json::from_str(&content)
-                            .with_context(|| format!("Failed to parse fuzz results from: {}", path.display()))?);
+                        fuzz_results = Some(serde_json::from_str(&content).with_context(|| {
+                            format!("Failed to parse fuzz results from: {}", path.display())
+                        })?);
                     }
                 }
             }
@@ -165,7 +171,7 @@ impl ReportGenerator {
     fn build_summary(&self, results: &[AnalysisResult]) -> ReportSummary {
         let mut issues_by_rule = HashMap::new();
         let mut files_with_issues = std::collections::HashSet::new();
-        
+
         let mut critical_count = 0;
         let mut high_count = 0;
         let mut medium_count = 0;
@@ -183,7 +189,7 @@ impl ReportGenerator {
 
             // Count by rule
             *issues_by_rule.entry(result.rule_name.clone()).or_insert(0) += 1;
-            
+
             // Track files with issues
             files_with_issues.insert(result.file_path.clone());
         }
@@ -203,8 +209,10 @@ impl ReportGenerator {
         let mut recommendations = Vec::new();
 
         if results.is_empty() {
-            recommendations.push("Great! No security issues found in the static analysis.".to_string());
-            recommendations.push("Consider running fuzz testing for more thorough coverage.".to_string());
+            recommendations
+                .push("Great! No security issues found in the static analysis.".to_string());
+            recommendations
+                .push("Consider running fuzz testing for more thorough coverage.".to_string());
             return recommendations;
         }
 
@@ -217,7 +225,10 @@ impl ReportGenerator {
         }
 
         if high_count > 0 {
-            recommendations.push(format!("⚠️  {} high-severity issues require attention.", high_count));
+            recommendations.push(format!(
+                "⚠️  {} high-severity issues require attention.",
+                high_count
+            ));
         }
 
         // Rule-specific recommendations
@@ -232,24 +243,37 @@ impl ReportGenerator {
                     recommendations.push(format!("Consider using checked arithmetic operations for {} overflow-prone locations.", count));
                 }
                 "missing_signer_check" => {
-                    recommendations.push(format!("Add signer validation to {} instruction handlers.", count));
+                    recommendations.push(format!(
+                        "Add signer validation to {} instruction handlers.",
+                        count
+                    ));
                 }
                 "unchecked_account" => {
-                    recommendations.push(format!("Implement proper account validation for {} locations.", count));
+                    recommendations.push(format!(
+                        "Implement proper account validation for {} locations.",
+                        count
+                    ));
                 }
                 "reentrancy" => {
-                    recommendations.push(format!("Review {} potential reentrancy vulnerabilities and implement guards.", count));
+                    recommendations.push(format!(
+                        "Review {} potential reentrancy vulnerabilities and implement guards.",
+                        count
+                    ));
                 }
                 _ => {}
             }
         }
 
         if recommendations.is_empty() {
-            recommendations.push("Review the identified issues and apply the suggested fixes.".to_string());
+            recommendations
+                .push("Review the identified issues and apply the suggested fixes.".to_string());
         }
 
-        recommendations.push("Run tests after fixing issues to ensure functionality is preserved.".to_string());
-        recommendations.push("Consider setting up CI/CD integration to catch issues early.".to_string());
+        recommendations.push(
+            "Run tests after fixing issues to ensure functionality is preserved.".to_string(),
+        );
+        recommendations
+            .push("Consider setting up CI/CD integration to catch issues early.".to_string());
 
         recommendations
     }
@@ -269,8 +293,9 @@ impl ReportGenerator {
 
         // Ensure output directory exists
         if let Some(parent) = output_path.parent() {
-            fs::create_dir_all(parent)
-                .with_context(|| format!("Failed to create output directory: {}", parent.display()))?;
+            fs::create_dir_all(parent).with_context(|| {
+                format!("Failed to create output directory: {}", parent.display())
+            })?;
         }
 
         fs::write(output_path, content)
@@ -281,8 +306,7 @@ impl ReportGenerator {
     }
 
     fn generate_json_report(&self, report: &SecurityReport) -> Result<String> {
-        serde_json::to_string_pretty(report)
-            .with_context(|| "Failed to serialize report to JSON")
+        serde_json::to_string_pretty(report).with_context(|| "Failed to serialize report to JSON")
     }
 
     fn generate_html_report(&self, report: &SecurityReport) -> Result<String> {
@@ -309,7 +333,11 @@ impl ReportGenerator {
                 result.severity,
                 result.line_number.map_or(String::new(), |n| n.to_string()),
                 result.message.replace('"', "\"\""),
-                result.suggestion.as_ref().map_or("", |s| s).replace('"', "\"\"")
+                result
+                    .suggestion
+                    .as_ref()
+                    .map_or("", |s| s)
+                    .replace('"', "\"\"")
             ));
         }
 
@@ -480,22 +508,20 @@ mod tests {
     #[test]
     fn test_summary_building() {
         let generator = ReportGenerator::new();
-        let results = vec![
-            AnalysisResult {
-                rule_name: "test_rule".to_string(),
-                severity: "critical".to_string(),
-                message: "Test message".to_string(),
-                file_path: "test.rs".to_string(),
-                line_number: Some(10),
-                column: None,
-                code_snippet: None,
-                suggestion: None,
-            }
-        ];
+        let results = vec![AnalysisResult {
+            rule_name: "test_rule".to_string(),
+            severity: "critical".to_string(),
+            message: "Test message".to_string(),
+            file_path: "test.rs".to_string(),
+            line_number: Some(10),
+            column: None,
+            code_snippet: None,
+            suggestion: None,
+        }];
 
         let summary = generator.build_summary(&results);
         assert_eq!(summary.total_issues, 1);
         assert_eq!(summary.critical_issues, 1);
         assert_eq!(summary.high_issues, 0);
     }
-} 
+}

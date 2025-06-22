@@ -3,11 +3,11 @@ use clap::Parser;
 use env_logger::Env;
 use log::info;
 
-mod cli;
 mod analyzer;
+mod cli;
 mod fuzz;
-mod report;
 mod plugin;
+mod report;
 
 use cli::{Cli, Commands};
 
@@ -15,23 +15,33 @@ use cli::{Cli, Commands};
 async fn main() -> Result<()> {
     // Initialize logger
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
-    
+
     let cli = Cli::parse();
-    
-    info!("Starting Solana Smart Contract Security Toolkit (scsec) v{}", env!("CARGO_PKG_VERSION"));
-    
+
+    info!(
+        "Starting Solana Smart Contract Security Toolkit (scsec) v{}",
+        env!("CARGO_PKG_VERSION")
+    );
+
     match cli.command {
-        Commands::Scan { path, config, output, format, fail_on_critical } => {
-            cli::handle_scan_command(path, config, output, format, fail_on_critical).await
-        }
-        Commands::Fuzz { path, timeout, jobs, output } => {
-            cli::handle_fuzz_command(path, timeout, jobs, output).await
-        }
-        Commands::Report { results, output, format } => {
-            cli::handle_report_command(results, output, format).await
-        }
-        Commands::Plugin { action, path } => {
-            cli::handle_plugin_command(action, path).await
-        }
+        Commands::Scan {
+            path,
+            config,
+            output,
+            format,
+            fail_on_critical,
+        } => cli::handle_scan_command(path, config, output, format, fail_on_critical).await,
+        Commands::Fuzz {
+            path,
+            timeout,
+            jobs,
+            output,
+        } => cli::handle_fuzz_command(path, timeout, jobs, output).await,
+        Commands::Report {
+            results,
+            output,
+            format,
+        } => cli::handle_report_command(results, output, format).await,
+        Commands::Plugin { action, path } => cli::handle_plugin_command(action, path).await,
     }
-} 
+}

@@ -1,11 +1,11 @@
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use clap::ValueEnum;
 use libloading::{Library, Symbol};
-use log::{info, warn, debug};
+use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Path, PathBuf};
 
 /// Severity levels for security issues
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -31,13 +31,13 @@ pub struct RuleResult {
 pub trait Rule: Send + Sync + std::fmt::Debug {
     /// Unique name for the rule
     fn name(&self) -> &str;
-    
+
     /// Human-readable description of what the rule checks
     fn description(&self) -> &str;
-    
+
     /// Check the given content and return any issues found
     fn check(&self, content: &str, file_path: &Path) -> Result<Vec<RuleResult>>;
-    
+
     /// Optional: rule configuration schema
     fn config_schema(&self) -> Option<serde_json::Value> {
         None
@@ -86,8 +86,12 @@ impl PluginManager {
 
         // Create plugin directory if it doesn't exist
         if !plugin_dir.exists() {
-            fs::create_dir_all(&plugin_dir)
-                .with_context(|| format!("Failed to create plugin directory: {}", plugin_dir.display()))?;
+            fs::create_dir_all(&plugin_dir).with_context(|| {
+                format!(
+                    "Failed to create plugin directory: {}",
+                    plugin_dir.display()
+                )
+            })?;
         }
 
         Ok(Self {
@@ -98,19 +102,22 @@ impl PluginManager {
 
     pub fn list_plugins(&self) -> Result<Vec<PluginInfo>> {
         let mut plugins = Vec::new();
-        
+
         // Add loaded plugins
         for (_, handle) in &self.plugins {
             plugins.push(handle.info.clone());
         }
-        
+
         // Scan plugin directory for available plugins
         if self.plugin_dir.exists() {
             for entry in fs::read_dir(&self.plugin_dir)? {
                 let entry = entry?;
                 let path = entry.path();
-                
-                if path.extension().map_or(false, |ext| ext == "so" || ext == "dll" || ext == "dylib") {
+
+                if path
+                    .extension()
+                    .map_or(false, |ext| ext == "so" || ext == "dll" || ext == "dylib")
+                {
                     // Try to read plugin metadata without loading
                     if let Ok(info) = self.read_plugin_info(&path) {
                         // Only add if not already loaded
@@ -121,29 +128,31 @@ impl PluginManager {
                 }
             }
         }
-        
+
         Ok(plugins)
     }
 
     pub fn load_plugin(&mut self, plugin_path: &Path) -> Result<()> {
         info!("Loading plugin: {}", plugin_path.display());
-        
+
         unsafe {
-            let library = Library::new(plugin_path)
-                .with_context(|| format!("Failed to load plugin library: {}", plugin_path.display()))?;
+            let library = Library::new(plugin_path).with_context(|| {
+                format!("Failed to load plugin library: {}", plugin_path.display())
+            })?;
 
             // Get plugin info
-            let get_info: Symbol<extern "C" fn() -> PluginInfo> = library
-                .get(b"get_plugin_info")
-                .with_context(|| "Plugin missing get_plugin_info function")?;
-            
+            let get_info: Symbol<extern "C" fn() -> PluginInfo> =
+                library
+                    .get(b"get_plugin_info")
+                    .with_context(|| "Plugin missing get_plugin_info function")?;
+
             let info = get_info();
 
             // Get plugin rules
             let create_rules: Symbol<extern "C" fn() -> Vec<Box<dyn Rule>>> = library
                 .get(b"create_rules")
                 .with_context(|| "Plugin missing create_rules function")?;
-            
+
             let rules = create_rules();
 
             debug!("Loaded plugin '{}' with {} rules", info.name, rules.len());
@@ -165,7 +174,8 @@ impl PluginManager {
         let plugin_name = if let Ok(info) = self.read_plugin_info(plugin_path) {
             info.name
         } else {
-            plugin_path.file_stem()
+            plugin_path
+                .file_stem()
                 .and_then(|s| s.to_str())
                 .unwrap_or("unknown")
                 .to_string()
@@ -195,8 +205,8 @@ impl PluginManager {
         // In a real implementation, you might store metadata separately
         unsafe {
             let library = Library::new(plugin_path)?;
-            let get_info: Symbol<extern "C" fn() -> PluginInfo> = library
-                .get(b"get_plugin_info")?;
+            let get_info: Symbol<extern "C" fn() -> PluginInfo> =
+                library.get(b"get_plugin_info")?;
             Ok(get_info())
         }
     }
@@ -217,7 +227,7 @@ impl Rule for ExampleCustomRule {
 
     fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
         let mut results = Vec::new();
-        
+
         // Example: detect usage of unsafe blocks
         for (line_num, line) in content.lines().enumerate() {
             if line.contains("unsafe") {
@@ -227,11 +237,13 @@ impl Rule for ExampleCustomRule {
                     line_number: Some(line_num + 1),
                     column: None,
                     code_snippet: Some(line.trim().to_string()),
-                    suggestion: Some("Consider if unsafe block is necessary and properly documented".to_string()),
+                    suggestion: Some(
+                        "Consider if unsafe block is necessary and properly documented".to_string(),
+                    ),
                 });
             }
         }
-        
+
         Ok(results)
     }
 
@@ -297,4 +309,4 @@ mod tests {
         let manager = PluginManager::new().unwrap();
         assert!(manager.plugin_dir.exists() || manager.plugin_dir.parent().is_some());
     }
-} 
+}

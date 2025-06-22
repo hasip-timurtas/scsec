@@ -1,10 +1,10 @@
-use anyhow::{Result, Context};
-use log::{info, warn, debug, error};
+use anyhow::{Context, Result};
+use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::fs;
 use tokio::time::{timeout, Duration};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,7 +21,7 @@ pub struct CrashInfo {
     pub crash_type: String,
     pub description: String,
     pub input_hash: String,
-    pub stack_trace: Option<String>, 
+    pub stack_trace: Option<String>,
     pub crash_file: Option<PathBuf>,
 }
 
@@ -51,8 +51,12 @@ impl FuzzEngine {
     pub fn new(program_path: PathBuf, output_dir: PathBuf) -> Result<Self> {
         // Create output directory
         if !output_dir.exists() {
-            fs::create_dir_all(&output_dir)
-                .with_context(|| format!("Failed to create output directory: {}", output_dir.display()))?;
+            fs::create_dir_all(&output_dir).with_context(|| {
+                format!(
+                    "Failed to create output directory: {}",
+                    output_dir.display()
+                )
+            })?;
         }
 
         let mut engine = Self {
@@ -68,7 +72,10 @@ impl FuzzEngine {
     }
 
     pub async fn run_fuzzing(&self, timeout_secs: u64, jobs: usize) -> Result<FuzzResult> {
-        info!("Starting fuzzing with {} jobs for {} seconds", jobs, timeout_secs);
+        info!(
+            "Starting fuzzing with {} jobs for {} seconds",
+            jobs, timeout_secs
+        );
 
         let mut all_crashes = Vec::new();
         let mut total_executions = 0u64;
@@ -81,11 +88,12 @@ impl FuzzEngine {
 
         for target in &self.targets {
             info!("Fuzzing target: {}", target.name);
-            
+
             let target_result = timeout(
                 Duration::from_secs(timeout_secs),
-                self.run_single_target(&target, jobs)
-            ).await;
+                self.run_single_target(&target, jobs),
+            )
+            .await;
 
             match target_result {
                 Ok(Ok(result)) => {
@@ -116,7 +124,10 @@ impl FuzzEngine {
     }
 
     fn discover_targets(&mut self) -> Result<()> {
-        info!("Discovering fuzz targets in: {}", self.program_path.display());
+        info!(
+            "Discovering fuzz targets in: {}",
+            self.program_path.display()
+        );
 
         // Look for IDL files to generate targets from
         if let Ok(idl_content) = self.find_and_read_idl() {
@@ -169,8 +180,8 @@ impl FuzzEngine {
 
     fn generate_targets_from_idl(&mut self, idl_content: &str) -> Result<()> {
         // Parse IDL (simplified JSON parsing)
-        let idl: serde_json::Value = serde_json::from_str(idl_content)
-            .with_context(|| "Failed to parse IDL JSON")?;
+        let idl: serde_json::Value =
+            serde_json::from_str(idl_content).with_context(|| "Failed to parse IDL JSON")?;
 
         if let Some(instructions) = idl.get("instructions").and_then(|i| i.as_array()) {
             for (idx, instruction) in instructions.iter().enumerate() {
@@ -188,9 +199,14 @@ impl FuzzEngine {
         Ok(())
     }
 
-    fn generate_instruction_harness(&self, instruction_name: &str, _instruction: &serde_json::Value) -> Result<String> {
+    fn generate_instruction_harness(
+        &self,
+        instruction_name: &str,
+        _instruction: &serde_json::Value,
+    ) -> Result<String> {
         // Generate a basic fuzzing harness for the instruction
-        let harness = format!(r#"
+        let harness = format!(
+            r#"
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 use arbitrary::Arbitrary;
@@ -219,7 +235,9 @@ fn fuzz_instruction_call(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>>
     // 4. Checking for panics/errors
     Ok(())
 }}
-"#, instruction_name);
+"#,
+            instruction_name
+        );
 
         Ok(harness)
     }
@@ -233,7 +251,7 @@ fn fuzz_instruction_call(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>>
         for entry in fs::read_dir(&fuzz_targets_dir)? {
             let entry = entry?;
             let path = entry.path();
-            
+
             if path.extension().map_or(false, |ext| ext == "rs") {
                 if let Some(name) = path.file_stem().and_then(|n| n.to_str()) {
                     let content = fs::read_to_string(&path)?;
@@ -283,10 +301,8 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
 
     async fn ensure_cargo_fuzz_installed(&self) -> Result<()> {
         debug!("Checking if cargo-fuzz is installed");
-        
-        let output = Command::new("cargo")
-            .args(&["fuzz", "--version"])
-            .output();
+
+        let output = Command::new("cargo").args(&["fuzz", "--version"]).output();
 
         match output {
             Ok(output) if output.status.success() => {
@@ -312,7 +328,7 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
 
     async fn init_fuzz_targets(&self) -> Result<()> {
         let fuzz_dir = self.program_path.join("fuzz");
-        
+
         if !fuzz_dir.exists() {
             info!("Initializing fuzz directory");
             let status = Command::new("cargo")
@@ -331,8 +347,9 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
         for target in &self.targets {
             let target_file = targets_dir.join(format!("{}.rs", target.name));
             if !target_file.exists() {
-                fs::write(&target_file, &target.harness_code)
-                    .with_context(|| format!("Failed to write target file: {}", target_file.display()))?;
+                fs::write(&target_file, &target.harness_code).with_context(|| {
+                    format!("Failed to write target file: {}", target_file.display())
+                })?;
                 debug!("Created fuzz target: {}", target_file.display());
             }
         }
@@ -345,9 +362,13 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
 
         let output = Command::new("cargo")
             .args(&[
-                "fuzz", "run", &target.name,
-                "--jobs", &jobs.to_string(),
-                "--", "-max_total_time=10"  // Run for 10 seconds per target
+                "fuzz",
+                "run",
+                &target.name,
+                "--jobs",
+                &jobs.to_string(),
+                "--",
+                "-max_total_time=10", // Run for 10 seconds per target
             ])
             .current_dir(&self.program_path)
             .output()
@@ -376,7 +397,7 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
 
     fn parse_crashes(&self, stdout: &str, stderr: &str) -> Result<Vec<CrashInfo>> {
         let mut crashes = Vec::new();
-        
+
         // Look for crash indicators in the output
         for line in stdout.lines().chain(stderr.lines()) {
             if line.contains("CRASH") || line.contains("ERROR") || line.contains("ASAN") {
@@ -419,7 +440,7 @@ fn basic_fuzz_function(_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
         let results_file = self.output_dir.join("fuzz_results.json");
         let json = serde_json::to_string_pretty(results)
             .with_context(|| "Failed to serialize fuzz results")?;
-        
+
         fs::write(&results_file, json)
             .with_context(|| format!("Failed to write results to: {}", results_file.display()))?;
 
@@ -451,8 +472,8 @@ mod tests {
 
         let mut engine = FuzzEngine::new(program_path, output_dir).unwrap();
         engine.create_basic_target().unwrap();
-        
+
         assert_eq!(engine.targets.len(), 1);
         assert_eq!(engine.targets[0].name, "basic_fuzz");
     }
-} 
+}

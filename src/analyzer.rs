@@ -1,11 +1,11 @@
-use anyhow::{Result, Context};
-use log::{info, warn, debug};
+use anyhow::{Context, Result};
+use log::{debug, info, warn};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
-use std::fs;
 
 use crate::plugin::{Rule, RuleResult, Severity};
 
@@ -54,8 +54,7 @@ impl StaticAnalyzer {
         let config = if let Some(path) = config_path {
             let config_content = fs::read_to_string(&path)
                 .with_context(|| format!("Failed to read config file: {}", path.display()))?;
-            toml::from_str(&config_content)
-                .with_context(|| "Failed to parse config file")?
+            toml::from_str(&config_content).with_context(|| "Failed to parse config file")?
         } else {
             AnalyzerConfig::default()
         };
@@ -103,7 +102,7 @@ impl StaticAnalyzer {
 
     async fn analyze_file(&mut self, file_path: &Path) -> Result<Vec<AnalysisResult>> {
         debug!("Analyzing file: {}", file_path.display());
-        
+
         let content = fs::read_to_string(file_path)
             .with_context(|| format!("Failed to read file: {}", file_path.display()))?;
 
@@ -127,7 +126,12 @@ impl StaticAnalyzer {
                         }
                     }
                     Err(e) => {
-                        warn!("Rule '{}' failed on file {}: {}", rule.name(), file_path.display(), e);
+                        warn!(
+                            "Rule '{}' failed on file {}: {}",
+                            rule.name(),
+                            file_path.display(),
+                            e
+                        );
                     }
                 }
             }
@@ -140,9 +144,9 @@ impl StaticAnalyzer {
         if self.config.disabled_rules.contains(&rule_name.to_string()) {
             return false;
         }
-        
-        self.config.enabled_rules.is_empty() || 
-        self.config.enabled_rules.contains(&rule_name.to_string())
+
+        self.config.enabled_rules.is_empty()
+            || self.config.enabled_rules.contains(&rule_name.to_string())
     }
 }
 
@@ -233,7 +237,8 @@ impl Rule for MissingSignerCheckRule {
         let lines: Vec<&str> = content.lines().collect();
 
         for (line_num, line) in lines.iter().enumerate() {
-            if line.contains("pub fn") && (line.contains("instruction") || line.contains("handler")) {
+            if line.contains("pub fn") && (line.contains("instruction") || line.contains("handler"))
+            {
                 // Look for the next few lines to see if there's a signer check
                 let mut has_signer_check = false;
                 for check_line in lines.iter().skip(line_num).take(10) {
@@ -250,7 +255,9 @@ impl Rule for MissingSignerCheckRule {
                         line_number: Some(line_num + 1),
                         column: None,
                         code_snippet: Some(line.trim().to_string()),
-                        suggestion: Some("Add signer validation to prevent unauthorized access".to_string()),
+                        suggestion: Some(
+                            "Add signer validation to prevent unauthorized access".to_string(),
+                        ),
                     });
                 }
             }
@@ -332,11 +339,15 @@ impl Rule for ReentrancyRule {
                     if check_line.contains("=") && !check_line.contains("let") {
                         results.push(RuleResult {
                             severity: Severity::High,
-                            message: "Potential reentrancy: state changes after external call".to_string(),
+                            message: "Potential reentrancy: state changes after external call"
+                                .to_string(),
                             line_number: Some(line_num + 1),
                             column: None,
                             code_snippet: Some(line.trim().to_string()),
-                            suggestion: Some("Move state changes before external calls or use reentrancy guards".to_string()),
+                            suggestion: Some(
+                                "Move state changes before external calls or use reentrancy guards"
+                                    .to_string(),
+                            ),
                         });
                         break;
                     }
@@ -346,4 +357,4 @@ impl Rule for ReentrancyRule {
 
         Ok(results)
     }
-} 
+}
