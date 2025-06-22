@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "generated_at": "2025-06-22T20:21:30.149887Z",
+    "solsec_version": "0.1.1",
+    "scan_target": "N/A",
+    "total_files_scanned": 0,
+    "scan_duration_ms": 0
+  },
+  "summary": {
+    "total_issues": 0,
+    "critical_issues": 0,
+    "high_issues": 0,
+    "medium_issues": 0,
+    "low_issues": 0,
+    "issues_by_rule": {},
+    "files_with_issues": []
+  },
+  "analysis_results": [],
+  "fuzz_results": null,
+  "recommendations": [
+    "Great! No security issues found in the static analysis.",
+    "Consider running fuzz testing for more thorough coverage."
+  ]
+}

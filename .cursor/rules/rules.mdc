@@ -169,7 +169,7 @@ if self.overflow_patterns.iter().any(|pattern| pattern.is_match(line)) {
 
 ### Version Management
 
-- **Cargo.toml version**: 0.1.0
+- **Cargo.toml version**: 0.1.1
 - **Rust edition**: 2021
 - **MSRV**: Not specified (use latest stable)
 
