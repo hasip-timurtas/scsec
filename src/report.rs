@@ -11,7 +11,7 @@ use std::path::Path;
 use crate::analyzer::AnalysisResult;
 use crate::fuzz::FuzzResult;
 
-#[derive(Debug, Clone, ValueEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, ValueEnum, Serialize, Deserialize)]
 pub enum ReportFormat {
     Json,
     Html,
