@@ -6,7 +6,6 @@ alwaysApply: false
 file_patterns:
   - "**"
 ---
-
 # Project Rules and Documentation
 
 ## Project Overview
@@ -24,6 +23,12 @@ solana-smart-contract-security-toolkit/
 │   ├── fuzz.rs              # Fuzzing engine with IDL integration
 │   ├── report.rs            # Multi-format report generation
 │   └── plugin.rs            # Plugin system and rule traits
+├── examples/                # Security vulnerability examples
+│   ├── integer_overflow/    # Integer overflow vulnerabilities
+│   ├── missing_signer_check/ # Missing authorization examples
+│   ├── unchecked_account/   # Unsafe account access patterns
+│   ├── reentrancy/          # Reentrancy vulnerability examples
+│   └── README.md            # Comprehensive examples documentation
 ├── ui/                      # Optional React TypeScript UI
 │   ├── src/
 │   ├── package.json
@@ -52,6 +57,27 @@ The analyzer includes 4 core security rules:
 2. **`missing_signer_check`** (High) - Identifies missing signer validation
 3. **`unchecked_account`** (Critical) - Finds accounts used without proper validation
 4. **`reentrancy`** (High) - Detects potential reentrancy vulnerabilities
+
+### Analyzer Improvements
+
+**Path Validation & Error Handling**:
+- **File Existence Checking**: Validates paths exist before analysis
+- **File Type Validation**: Warns about non-Rust files
+- **Directory Analysis**: Counts and reports Rust files found
+- **Proper Error Messages**: Clear, actionable feedback instead of misleading "0 issues found"
+- **Colored Error Logging**: ERROR messages appear in red with timestamps
+- **Exit Codes**: Returns proper exit codes for different error conditions
+
+**Examples**:
+```bash
+# Before: misleading output
+solsec scan nonexistent.rs → "Found 0 issues" 
+
+# After: clear error messaging  
+solsec scan nonexistent.rs → "[ERROR] Path does not exist: nonexistent.rs" + exit code 1
+solsec scan file.py → "[WARN] File is not a Rust source file (.rs): file.py"
+solsec scan empty_dir/ → "[WARN] No Rust source files (.rs) found in directory: empty_dir"
+```
 
 ### Plugin System
 
@@ -409,6 +435,32 @@ AnalysisResult {
 - **GitHub Actions marketplace** - Pre-built action
 - **VS Code extension** - Real-time security analysis
 
+## Examples Documentation
+
+### Vulnerability Examples
+
+The `examples/` directory contains comprehensive demonstrations of security vulnerabilities:
+
+**Structure**:
+- 8 Rust files (4 vulnerability types × 2 versions each)
+- Each vulnerability has `vulnerable.rs` and `secure.rs` versions
+- Comprehensive README with learning objectives and usage instructions
+
+**Testing Results**:
+```bash
+solsec scan examples/integer_overflow/vulnerable.rs     # 5 issues
+solsec scan examples/missing_signer_check/vulnerable.rs # 5 issues  
+solsec scan examples/unchecked_account/vulnerable.rs    # 6 issues
+solsec scan examples/reentrancy/vulnerable.rs           # 2 issues
+solsec scan examples/                                    # 26 total issues
+```
+
+**Educational Value**:
+- Side-by-side comparison of vulnerable vs secure patterns
+- Real-world Solana/Anchor code examples
+- Clear comments explaining security issues
+- Regression testing for analyzer functionality
+
 ## Troubleshooting
 
 ### Common Issues
@@ -421,11 +473,16 @@ AnalysisResult {
    - Verify `.git/hooks/pre-commit` exists and is executable
    - Test manually: `.git/hooks/pre-commit`
 
-3. **UI not loading styles**
+3. **"Found 0 issues" on non-existent files**
+   - ✅ **FIXED**: Now shows proper error messages with colored output
+   - File existence validated before analysis
+   - Clear warnings for wrong file types or empty directories
+
+4. **UI not loading styles**
    - Ensure `postcss.config.js` exists for Tailwind CSS processing
    - Check Vite configuration includes PostCSS
 
-4. **Plugin loading fails**
+5. **Plugin loading fails**
    - Verify dynamic library is compiled with correct crate type: `cdylib`
    - Check FFI function signatures match expected interface
 
@@ -435,6 +492,7 @@ AnalysisResult {
 - **Check file permissions** for git hooks and plugins
 - **Verify configuration syntax** with `scsec scan --config path/to/config.toml`
 - **Test individual rules** by enabling only specific rules in configuration
+- **Use examples for validation**: Test analyzer behavior with known vulnerable/secure code
 
 ---
 
