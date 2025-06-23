@@ -90,62 +90,6 @@ impl ReportGenerator {
         self.write_report(&report, output_path, format).await
     }
 
-    pub async fn generate_from_directory(
-        &self,
-        results_dir: &Path,
-        output_path: &Path,
-        format: ReportFormat,
-    ) -> Result<()> {
-        info!(
-            "Generating report from directory: {}",
-            results_dir.display()
-        );
-
-        // Load analysis results
-        let mut analysis_results = Vec::new();
-        let mut fuzz_results = None;
-
-        if results_dir.exists() {
-            for entry in fs::read_dir(results_dir)? {
-                let entry = entry?;
-                let path = entry.path();
-
-                if path.extension().is_some_and(|ext| ext == "json") {
-                    let filename = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-
-                    if filename.contains("analysis") || filename.contains("scan") {
-                        let content = fs::read_to_string(&path)?;
-
-                        // Try to parse as SecurityReport first (from scan command)
-                        if let Ok(security_report) =
-                            serde_json::from_str::<SecurityReport>(&content)
-                        {
-                            analysis_results.extend(security_report.analysis_results);
-                        } else {
-                            // Fallback to parsing as Vec<AnalysisResult> (legacy format)
-                            let results: Vec<AnalysisResult> = serde_json::from_str(&content)
-                                .with_context(|| {
-                                    format!(
-                                        "Failed to parse analysis results from: {}",
-                                        path.display()
-                                    )
-                                })?;
-                            analysis_results.extend(results);
-                        }
-                    } else if filename.contains("fuzz") {
-                        let content = fs::read_to_string(&path)?;
-                        fuzz_results = Some(serde_json::from_str(&content).with_context(|| {
-                            format!("Failed to parse fuzz results from: {}", path.display())
-                        })?);
-                    }
-                }
-            }
-        }
-
-        let report = self.build_report(&analysis_results, fuzz_results).await?;
-        self.write_report(&report, output_path, format).await
-    }
-
     async fn build_report(
         &self,
         analysis_results: &[AnalysisResult],

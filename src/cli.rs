@@ -34,9 +34,17 @@ pub enum Commands {
         #[arg(short, long, default_value = "./solsec-results")]
         output: PathBuf,
 
-        /// Output format
-        #[arg(short, long, default_value = "json")]
-        format: ReportFormat,
+        /// Output format(s) - can specify multiple: json,html,markdown,csv
+        #[arg(short, long, default_value = "json,html", value_delimiter = ',')]
+        format: Vec<ReportFormat>,
+
+        /// Only generate JSON output (for CI/CD integration)
+        #[arg(long, conflicts_with = "format")]
+        json_only: bool,
+
+        /// Only generate HTML output (for human review)
+        #[arg(long, conflicts_with = "format")]
+        html_only: bool,
 
         /// Fail with non-zero exit code on critical issues
         #[arg(long, default_value = "true")]
@@ -62,21 +70,6 @@ pub enum Commands {
         output: PathBuf,
     },
 
-    /// Generate reports from analysis results
-    Report {
-        /// Path to results directory
-        #[arg(value_name = "RESULTS")]
-        results: PathBuf,
-
-        /// Output path for generated report
-        #[arg(short, long, default_value = "./report.html")]
-        output: PathBuf,
-
-        /// Report format
-        #[arg(short, long, default_value = "html")]
-        format: ReportFormat,
-    },
-
     /// Manage security rule plugins
     Plugin {
         /// Plugin action
@@ -92,7 +85,9 @@ pub async fn handle_scan_command(
     path: PathBuf,
     config: Option<PathBuf>,
     output: PathBuf,
-    format: ReportFormat,
+    formats: Vec<ReportFormat>,
+    json_only: bool,
+    html_only: bool,
     fail_on_critical: bool,
 ) -> Result<()> {
     info!("Starting static analysis scan on: {}", path.display());
@@ -100,11 +95,37 @@ pub async fn handle_scan_command(
     let mut analyzer = StaticAnalyzer::new(config)?;
     let results = analyzer.analyze_path(&path).await?;
 
-    // Generate report
+    // Determine which formats to generate
+    let formats_to_generate = if json_only {
+        vec![ReportFormat::Json]
+    } else if html_only {
+        vec![ReportFormat::Html]
+    } else {
+        formats
+    };
+
+    // Generate reports in all requested formats
     let report_gen = ReportGenerator::new();
-    report_gen
-        .generate_report(&results, &output, format)
-        .await?;
+    for format in formats_to_generate {
+        let extension = match format {
+            ReportFormat::Json => "json",
+            ReportFormat::Html => "html",
+            ReportFormat::Markdown => "md",
+            ReportFormat::Csv => "csv",
+        };
+
+        let output_file = if output.extension().is_some() {
+            // If user provided a specific filename, respect it for the first format
+            output.clone()
+        } else {
+            // Generate appropriate filename based on format
+            output.join(format!("security-report.{}", extension))
+        };
+
+        report_gen
+            .generate_report(&results, &output_file, format.clone())
+            .await?;
+    }
 
     let critical_count = results.iter().filter(|r| r.severity == "critical").count();
     let high_count = results.iter().filter(|r| r.severity == "high").count();
@@ -141,23 +162,6 @@ pub async fn handle_fuzz_command(
             warn!("Crash: {}", crash.description);
         }
     }
-
-    Ok(())
-}
-
-pub async fn handle_report_command(
-    results: PathBuf,
-    output: PathBuf,
-    format: ReportFormat,
-) -> Result<()> {
-    info!("Generating report from: {}", results.display());
-
-    let report_gen = ReportGenerator::new();
-    report_gen
-        .generate_from_directory(&results, &output, format)
-        .await?;
-
-    info!("Report generated: {}", output.display());
 
     Ok(())
 }
