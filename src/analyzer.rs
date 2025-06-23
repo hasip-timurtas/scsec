@@ -115,7 +115,14 @@ impl StaticAnalyzer {
             }
         } else if path.is_dir() {
             let mut rust_files_found = 0;
-            for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
+            let walker = WalkDir::new(path).into_iter();
+            let filtered_walker = walker.filter_entry(|e| {
+                let is_target = e.file_name() == "target";
+                let is_git = e.file_name() == ".git";
+                !is_target && !is_git
+            });
+
+            for entry in filtered_walker.filter_map(|e| e.ok()) {
                 let entry_path = entry.path();
                 if entry_path.extension().is_some_and(|ext| ext == "rs") {
                     rust_files_found += 1;

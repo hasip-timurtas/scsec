@@ -22,8 +22,8 @@ pub struct Cli {
 pub enum Commands {
     /// Run static analysis on Solana smart contracts
     Scan {
-        /// Path to the program directory or IDL file
-        #[arg(value_name = "PATH")]
+        /// Path to the program directory or file(s). Defaults to current directory.
+        #[arg(value_name = "PATH", default_value = ".")]
         path: PathBuf,
 
         /// Configuration file path
