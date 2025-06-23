@@ -1,6 +1,6 @@
 [package]
 name = "solsec"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 description = "Solana Smart Contract Security Toolkit - Find security bugs before deployment"
 authors = ["Hasip Timurtas"]
