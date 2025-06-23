@@ -53,6 +53,10 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
     - uses: actions/checkout@v4
     
@@ -116,7 +120,10 @@ jobs:
               
               if (jsonFiles.length > 0) {
                 const resultsFile = path.join(resultsPath, jsonFiles[0]);
-                const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+                const report = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+                
+                // Handle both SecurityReport format and legacy array format
+                const results = report.analysis_results || report;
                 
                 const criticalCount = results.filter(r => r.severity === 'critical').length;
                 const highCount = results.filter(r => r.severity === 'high').length;
