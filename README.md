@@ -14,7 +14,7 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 - **Multiple Report Formats**: JSON, HTML, Markdown, and CSV outputs
 - **Plugin System**: Extensible architecture for custom security rules
 - **CI/CD Integration**: GitHub Actions support with automated security checks
-- **Professional Reports**: Beautiful HTML reports with severity rankings and actionable recommendations
+- **Professional Reports**: HTML reports with severity rankings and actionable recommendations
 - **Smart Error Handling**: Clear, colored error messages with proper path validation
 - **Comprehensive Examples**: 8 educational examples demonstrating vulnerabilities and secure patterns
 
@@ -52,7 +52,7 @@ solsec scan ./my-program --html-only --output results.html
 # Generate multiple formats at once
 solsec scan ./my-program --format json,html,markdown,csv
 
-# Don't open browser automatically (useful for CI/automation)
+# Don't open browser automatically
 solsec scan ./my-program --no-open
 
 # Run fuzz testing
@@ -63,9 +63,9 @@ solsec fuzz ./my-solana-program --timeout 300
 
 ### `solsec scan`
 
-Run static analysis on your Solana smart contracts. Generates both JSON and HTML If no path is provided, it recursively scans the current directory for all `.rs` files, automatically ignoring `target/` and `.git/` folders.
+Run static analysis on your Solana smart contracts. Generates both JSON and HTML by default. If no path is provided, it recursively scans the current directory for all `.rs` files, automatically ignoring `target/` and `.git/` folders.
 
-HTML reports automatically open in your default browser when running interactively, but remain closed in CI/automation environments.
+HTML reports automatically open in the default browser when running interactively, but remain closed in CI/automation environments.
 
 ```bash
 solsec scan [PATH] [OPTIONS]
@@ -74,25 +74,25 @@ OPTIONS:
     -c, --config <FILE>          Configuration file path
     -o, --output <DIR>           Output directory [default: ./solsec-results]
     -f, --format <FORMATS>       Output formats (comma-separated) [default: json,html] [possible values: json, html, markdown, csv]
-        --json-only              Only generate JSON (perfect for CI/CD)
-        --html-only              Only generate HTML (perfect for humans)
+        --json-only              Only generate JSON
+        --html-only              Only generate HTML
         --no-open                Don't automatically open HTML report in browser
         --fail-on-critical       Exit with non-zero code on critical issues [default: true]
 
 EXAMPLES:
-    # Scan the entire project (generates both JSON and HTML, opens in browser!)
+    # Scan the entire project (generates both JSON and HTML)
     solsec scan
 
     # Scan a specific directory with default formats
     solsec scan ./programs/my-program
     
-    # Generate only JSON for CI/CD integration (no browser opening)
+    # Generate only JSON for CI/CD integration
     solsec scan ./programs --json-only --output results.json
 
-    # Generate only HTML for manual review (opens in browser)
+    # Generate only HTML for manual review
     solsec scan ./programs --html-only --output results.html
 
-    # Generate HTML but don't open browser (useful for automation)
+    # Generate HTML but don't open browser
     solsec scan ./programs --html-only --no-open --output results.html
 
     # Generate all available formats
@@ -308,35 +308,32 @@ rm -rf ./tmp-security-results
 echo "✅ Security scan passed!"
 ```
 
-## 🌐 Smart Browser Opening
+## Browser Opening Behavior
 
-**Automatic browser opening** when generating HTML reports makes reviewing security findings effortless:
+HTML reports automatically open in the default browser under the following conditions:
 
-**✅ Opens automatically when:**
+**Opens automatically when:**
 - Running in an interactive terminal (not redirected)
 - Generating HTML reports (`--html-only` or default formats)
 - Not in CI/automation environments
 
-**❌ Stays closed when:**
+**Remains closed when:**
 - Running in CI environments (GitHub Actions, GitLab CI, etc.)
 - Output is redirected or piped
 - Using `--no-open` flag
 - Only generating non-visual formats (JSON, CSV)
 
-This gives you the best of both worlds: **great UX for developers** and **automation-friendly behavior** for CI/CD.
-
 ## 📊 Report Examples
 
 ### HTML Report
-Beautiful, interactive HTML reports with:
+Interactive HTML reports with:
 - Executive summary with issue counts by severity
 - Detailed findings with code snippets
 - Actionable recommendations
 - Responsive design for all devices
-- **Auto-opens in your browser for immediate review!**
 
 ### JSON Report
-Machine-readable format perfect for:
+Machine-readable format for:
 - CI/CD pipeline integration
 - Custom tooling and analysis
 - Data processing and metrics
@@ -395,7 +392,7 @@ solsec scan examples/unchecked_account/vulnerable.rs    # 6 issues found
 solsec scan examples/reentrancy/vulnerable.rs           # 2 issues found
 
 # Test secure examples (should find 0 issues)
-solsec scan examples/*/secure.rs                        # All pass!
+solsec scan examples/*/secure.rs                        # No issues found
 
 # Comprehensive analysis
 solsec scan examples/                                    # 26 total issues across all vulnerable examples
