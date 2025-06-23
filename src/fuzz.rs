@@ -36,7 +36,7 @@ pub struct CoverageInfo {
 #[derive(Debug)]
 pub struct FuzzEngine {
     program_path: PathBuf,
-    output_dir: PathBuf,
+    fuzz_dir: PathBuf,
     targets: Vec<FuzzTarget>,
 }
 
@@ -49,19 +49,19 @@ struct FuzzTarget {
 
 impl FuzzEngine {
     pub fn new(program_path: PathBuf, output_dir: PathBuf) -> Result<Self> {
-        // Create output directory
-        if !output_dir.exists() {
-            fs::create_dir_all(&output_dir).with_context(|| {
-                format!(
-                    "Failed to create output directory: {}",
-                    output_dir.display()
-                )
+        // Determine the final, safe path for the fuzzing project directory
+        let fuzz_dir = Self::get_safe_fuzz_dir_static(&program_path, &output_dir)?;
+
+        // Create the directory if it doesn't exist
+        if !fuzz_dir.exists() {
+            fs::create_dir_all(&fuzz_dir).with_context(|| {
+                format!("Failed to create fuzz directory: {}", fuzz_dir.display())
             })?;
         }
 
         let mut engine = Self {
             program_path,
-            output_dir,
+            fuzz_dir,
             targets: Vec::new(),
         };
 
@@ -69,6 +69,129 @@ impl FuzzEngine {
         engine.discover_targets()?;
 
         Ok(engine)
+    }
+
+    /// Static version of get_safe_fuzz_dir to be used in `new`
+    fn get_safe_fuzz_dir_static(program_path: &Path, requested_dir: &Path) -> Result<PathBuf> {
+        // If the requested path is absolute, use it as-is
+        if requested_dir.is_absolute() {
+            return Ok(requested_dir.to_path_buf());
+        }
+
+        // Check if we're in a workspace environment
+        if let Some(workspace_root) = Self::find_workspace_root(program_path)? {
+            // If the program path is inside a workspace member directory,
+            // create the fuzz directory at the workspace root level
+            if Self::is_inside_workspace_member(program_path, &workspace_root)? {
+                let safe_dir = workspace_root.join(
+                    requested_dir
+                        .file_name()
+                        .unwrap_or_else(|| std::ffi::OsStr::new("solsec-fuzz")),
+                );
+                warn!(
+                    "Detected workspace environment. Moving fuzz directory to: {}",
+                    safe_dir.display()
+                );
+                return Ok(safe_dir);
+            }
+        }
+
+        // Default: use the requested directory relative to the current path
+        Ok(requested_dir.to_path_buf())
+    }
+
+    /// Find the workspace root by looking for Cargo.toml with [workspace]
+    fn find_workspace_root(start_path: &Path) -> Result<Option<PathBuf>> {
+        let mut current = start_path;
+
+        loop {
+            let cargo_toml = current.join("Cargo.toml");
+            if cargo_toml.exists() {
+                let content = fs::read_to_string(&cargo_toml)
+                    .with_context(|| format!("Failed to read {}", cargo_toml.display()))?;
+
+                // Check if this Cargo.toml defines a workspace
+                if content.contains("[workspace]") {
+                    debug!("Found workspace root: {}", current.display());
+                    return Ok(Some(current.to_path_buf()));
+                }
+            }
+
+            match current.parent() {
+                Some(parent) => current = parent,
+                None => break,
+            }
+        }
+
+        Ok(None)
+    }
+
+    /// Check if the program path is inside a workspace member directory
+    fn is_inside_workspace_member(program_path: &Path, workspace_root: &Path) -> Result<bool> {
+        let cargo_toml = workspace_root.join("Cargo.toml");
+        if !cargo_toml.exists() {
+            return Ok(false);
+        }
+
+        let content = fs::read_to_string(&cargo_toml)
+            .with_context(|| format!("Failed to read {}", cargo_toml.display()))?;
+
+        // Parse TOML to check workspace members
+        let parsed: toml::Value = content
+            .parse()
+            .with_context(|| format!("Failed to parse TOML in {}", cargo_toml.display()))?;
+
+        if let Some(workspace) = parsed.get("workspace") {
+            if let Some(members) = workspace.get("members") {
+                if let Some(member_array) = members.as_array() {
+                    for member in member_array {
+                        if let Some(member_pattern) = member.as_str() {
+                            // Check if the program path matches any workspace member pattern
+                            if Self::path_matches_pattern(
+                                program_path,
+                                workspace_root,
+                                member_pattern,
+                            )? {
+                                debug!(
+                                    "Program path {} matches workspace member pattern: {}",
+                                    program_path.display(),
+                                    member_pattern
+                                );
+                                return Ok(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(false)
+    }
+
+    /// Check if a path matches a workspace member pattern (e.g., "programs/*")
+    fn path_matches_pattern(path: &Path, workspace_root: &Path, pattern: &str) -> Result<bool> {
+        // Get relative path from workspace root
+        let relative_path = path.strip_prefix(workspace_root).unwrap_or(path);
+
+        // Handle glob patterns like "programs/*"
+        if let Some(prefix) = pattern.strip_suffix("/*") {
+            if let Some(first_component) = relative_path.components().next() {
+                if let Some(component_str) = first_component.as_os_str().to_str() {
+                    return Ok(component_str == prefix);
+                }
+            }
+        } else {
+            // Exact match
+            if let Some(path_str) = relative_path.to_str() {
+                return Ok(path_str == pattern);
+            }
+        }
+
+        Ok(false)
+    }
+
+    fn get_safe_fuzz_dir(&self) -> PathBuf {
+        self.fuzz_dir.clone()
     }
 
     pub async fn run_fuzzing(&self, timeout_secs: u64, jobs: usize) -> Result<FuzzResult> {
@@ -135,7 +258,7 @@ impl FuzzEngine {
         }
 
         // Look for existing fuzz targets
-        let fuzz_dir = self.program_path.join("fuzz");
+        let fuzz_dir = self.get_safe_fuzz_dir();
         if fuzz_dir.exists() {
             self.discover_existing_targets(&fuzz_dir)?;
         }
@@ -511,34 +634,25 @@ fn parse_instruction_payload(discriminator: u8, payload: &[u8]) -> Result<(), Bo
     }
 
     async fn init_fuzz_targets(&self) -> Result<()> {
-        let fuzz_dir = self.program_path.join("fuzz");
+        let fuzz_dir = self.get_safe_fuzz_dir();
 
-        if !fuzz_dir.exists() {
-            info!("Initializing fuzz directory");
-            let status = Command::new("cargo")
-                .args(["fuzz", "init"])
-                .current_dir(&self.program_path)
-                .status()
-                .with_context(|| "Failed to initialize cargo-fuzz")?;
+        // Always ensure the main fuzz directory exists
+        fs::create_dir_all(&fuzz_dir)
+            .with_context(|| format!("Failed to create fuzz directory: {}", fuzz_dir.display()))?;
 
-            if !status.success() {
-                return Err(anyhow::anyhow!("Failed to initialize fuzz directory"));
-            }
-        }
+        // Always ensure the fuzz_targets subdirectory exists
+        let targets_dir = fuzz_dir.join("fuzz_targets");
+        fs::create_dir_all(&targets_dir).with_context(|| {
+            format!(
+                "Failed to create fuzz_targets directory: {}",
+                targets_dir.display()
+            )
+        })?;
+
+        // Generate and write Cargo.toml, this will overwrite on every run to keep it updated
+        self.write_fuzz_cargo_toml(&fuzz_dir)?;
 
         // Create/update target files
-        let targets_dir = fuzz_dir.join("fuzz_targets");
-
-        // Ensure fuzz_targets directory exists
-        if !targets_dir.exists() {
-            fs::create_dir_all(&targets_dir).with_context(|| {
-                format!(
-                    "Failed to create fuzz targets directory: {}",
-                    targets_dir.display()
-                )
-            })?;
-        }
-
         for target in &self.targets {
             let target_file = targets_dir.join(format!("{}.rs", target.name));
             if !target_file.exists() {
@@ -546,8 +660,59 @@ fn parse_instruction_payload(discriminator: u8, payload: &[u8]) -> Result<(), Bo
                     format!("Failed to write target file: {}", target_file.display())
                 })?;
                 debug!("Created fuzz target: {}", target_file.display());
+
+                // Create a corpus directory for the new target
+                let corpus_dir = fuzz_dir.join("corpus").join(&target.name);
+                if !corpus_dir.exists() {
+                    fs::create_dir_all(&corpus_dir)?;
+                    fs::write(corpus_dir.join("seed"), b"")?;
+                }
             }
         }
+
+        Ok(())
+    }
+
+    /// Generate and write the Cargo.toml for the fuzz project
+    fn write_fuzz_cargo_toml(&self, fuzz_dir: &Path) -> Result<()> {
+        let mut manifest = String::from(
+            r#"[package]
+name = "solsec-fuzz"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1.0", features = ["derive"] }
+
+"#,
+        );
+
+        for target in &self.targets {
+            let bin_entry = format!(
+                r#"
+[[bin]]
+name = "{}"
+path = "fuzz_targets/{}.rs"
+test = false
+doc = false
+"#,
+                target.name, target.name
+            );
+            manifest.push_str(&bin_entry);
+        }
+
+        let cargo_toml_path = fuzz_dir.join("Cargo.toml");
+        fs::write(&cargo_toml_path, manifest).with_context(|| {
+            format!(
+                "Failed to write fuzz Cargo.toml to {}",
+                cargo_toml_path.display()
+            )
+        })?;
 
         Ok(())
     }
@@ -557,6 +722,8 @@ fn parse_instruction_payload(discriminator: u8, payload: &[u8]) -> Result<(), Bo
             "Running fuzz target: {} (entry point: {})",
             target.name, target.entry_point
         );
+
+        let fuzz_dir = self.get_safe_fuzz_dir();
 
         let output = Command::new("cargo")
             .args([
@@ -568,7 +735,7 @@ fn parse_instruction_payload(discriminator: u8, payload: &[u8]) -> Result<(), Bo
                 "--",
                 "-max_total_time=10", // Run for 10 seconds per target
             ])
-            .current_dir(&self.program_path)
+            .current_dir(&fuzz_dir)
             .output()
             .with_context(|| format!("Failed to run fuzz target: {}", target.name))?;
 
@@ -635,7 +802,7 @@ fn parse_instruction_payload(discriminator: u8, payload: &[u8]) -> Result<(), Bo
     }
 
     async fn save_results(&self, results: &FuzzResult) -> Result<()> {
-        let results_file = self.output_dir.join("fuzz_results.json");
+        let results_file = self.fuzz_dir.join("fuzz_results.json");
         let json = serde_json::to_string_pretty(results)
             .with_context(|| "Failed to serialize fuzz results")?;
 

@@ -22,3 +22,4 @@ target/
 
 node_modules/
 solsec-results
+.DS_Store
