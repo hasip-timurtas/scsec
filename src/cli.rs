@@ -58,7 +58,7 @@ pub enum Commands {
         jobs: usize,
 
         /// Output directory for fuzz results
-        #[arg(short, long, default_value = "./fuzz-results")]
+        #[arg(short, long, default_value = "./solsec-fuzz")]
         output: PathBuf,
     },
 

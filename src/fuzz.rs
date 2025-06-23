@@ -36,7 +36,7 @@ pub struct CoverageInfo {
 #[derive(Debug)]
 pub struct FuzzEngine {
     program_path: PathBuf,
-    output_dir: PathBuf,
+    fuzz_dir: PathBuf,
     targets: Vec<FuzzTarget>,
 }
 
@@ -49,22 +49,19 @@ struct FuzzTarget {
 
 impl FuzzEngine {
     pub fn new(program_path: PathBuf, output_dir: PathBuf) -> Result<Self> {
-        // Ensure output directory is not inside workspace member directories
-        let safe_output_dir = Self::get_safe_output_dir(&program_path, &output_dir)?;
+        // Determine the final, safe path for the fuzzing project directory
+        let fuzz_dir = Self::get_safe_fuzz_dir_static(&program_path, &output_dir)?;
 
-        // Create output directory
-        if !safe_output_dir.exists() {
-            fs::create_dir_all(&safe_output_dir).with_context(|| {
-                format!(
-                    "Failed to create output directory: {}",
-                    safe_output_dir.display()
-                )
+        // Create the directory if it doesn't exist
+        if !fuzz_dir.exists() {
+            fs::create_dir_all(&fuzz_dir).with_context(|| {
+                format!("Failed to create fuzz directory: {}", fuzz_dir.display())
             })?;
         }
 
         let mut engine = Self {
             program_path,
-            output_dir: safe_output_dir,
+            fuzz_dir,
             targets: Vec::new(),
         };
 
@@ -74,29 +71,33 @@ impl FuzzEngine {
         Ok(engine)
     }
 
-    /// Get a safe output directory that won't conflict with workspace members
-    fn get_safe_output_dir(program_path: &Path, requested_output: &Path) -> Result<PathBuf> {
-        // If the requested output is absolute, use it as-is
-        if requested_output.is_absolute() {
-            return Ok(requested_output.to_path_buf());
+    /// Static version of get_safe_fuzz_dir to be used in `new`
+    fn get_safe_fuzz_dir_static(program_path: &Path, requested_dir: &Path) -> Result<PathBuf> {
+        // If the requested path is absolute, use it as-is
+        if requested_dir.is_absolute() {
+            return Ok(requested_dir.to_path_buf());
         }
 
         // Check if we're in a workspace environment
         if let Some(workspace_root) = Self::find_workspace_root(program_path)? {
             // If the program path is inside a workspace member directory,
-            // create the output directory at the workspace root level
+            // create the fuzz directory at the workspace root level
             if Self::is_inside_workspace_member(program_path, &workspace_root)? {
-                let safe_dir = workspace_root.join("solsec-fuzz-results");
+                let safe_dir = workspace_root.join(
+                    requested_dir
+                        .file_name()
+                        .unwrap_or_else(|| std::ffi::OsStr::new("solsec-fuzz")),
+                );
                 warn!(
-                    "Detected workspace environment. Moving output directory to: {}",
+                    "Detected workspace environment. Moving fuzz directory to: {}",
                     safe_dir.display()
                 );
                 return Ok(safe_dir);
             }
         }
 
-        // Default: use the requested output directory
-        Ok(requested_output.to_path_buf())
+        // Default: use the requested directory relative to the current path
+        Ok(requested_dir.to_path_buf())
     }
 
     /// Find the workspace root by looking for Cargo.toml with [workspace]
@@ -189,23 +190,8 @@ impl FuzzEngine {
         Ok(false)
     }
 
-    /// Get a safe fuzz directory that won't conflict with workspace members
-    fn get_safe_fuzz_dir(&self) -> Result<PathBuf> {
-        // Check if we're in a workspace environment
-        if let Some(workspace_root) = Self::find_workspace_root(&self.program_path)? {
-            if Self::is_inside_workspace_member(&self.program_path, &workspace_root)? {
-                // Create fuzz directory at workspace root to avoid conflicts
-                let safe_fuzz_dir = workspace_root.join("solsec-fuzz");
-                info!(
-                    "Using workspace-safe fuzz directory: {}",
-                    safe_fuzz_dir.display()
-                );
-                return Ok(safe_fuzz_dir);
-            }
-        }
-
-        // Default: use fuzz directory in program path
-        Ok(self.program_path.join("fuzz"))
+    fn get_safe_fuzz_dir(&self) -> PathBuf {
+        self.fuzz_dir.clone()
     }
 
     pub async fn run_fuzzing(&self, timeout_secs: u64, jobs: usize) -> Result<FuzzResult> {
@@ -272,7 +258,7 @@ impl FuzzEngine {
         }
 
         // Look for existing fuzz targets
-        let fuzz_dir = self.get_safe_fuzz_dir()?;
+        let fuzz_dir = self.get_safe_fuzz_dir();
         if fuzz_dir.exists() {
             self.discover_existing_targets(&fuzz_dir)?;
         }
@@ -648,7 +634,7 @@ fn parse_instruction_payload(discriminator: u8, payload: &[u8]) -> Result<(), Bo
     }
 
     async fn init_fuzz_targets(&self) -> Result<()> {
-        let fuzz_dir = self.get_safe_fuzz_dir()?;
+        let fuzz_dir = self.get_safe_fuzz_dir();
 
         if !fuzz_dir.exists() {
             info!("Initializing fuzz directory at: {}", fuzz_dir.display());
@@ -731,7 +717,7 @@ doc = false
             target.name, target.entry_point
         );
 
-        let fuzz_dir = self.get_safe_fuzz_dir()?;
+        let fuzz_dir = self.get_safe_fuzz_dir();
 
         let output = Command::new("cargo")
             .args([
@@ -810,7 +796,7 @@ doc = false
     }
 
     async fn save_results(&self, results: &FuzzResult) -> Result<()> {
-        let results_file = self.output_dir.join("fuzz_results.json");
+        let results_file = self.fuzz_dir.join("fuzz_results.json");
         let json = serde_json::to_string_pretty(results)
             .with_context(|| "Failed to serialize fuzz results")?;
 
