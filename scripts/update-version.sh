@@ -41,13 +41,13 @@ CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/'
 log_info "Current version: $CURRENT_VERSION"
 log_info "New version: $NEW_VERSION"
 
-# Confirm the update
-echo ""
-read -p "Are you sure you want to update from $CURRENT_VERSION to $NEW_VERSION? (y/N): " -r
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    log_info "Version update cancelled"
-    exit 0
-fi
+# # Confirm the update
+# echo ""
+# read -p "Are you sure you want to update from $CURRENT_VERSION to $NEW_VERSION? (y/N): " -r
+# if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+#     log_info "Version update cancelled"
+#     exit 0
+# fi
 
 log_info "Starting version update process..."
 
