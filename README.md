@@ -32,7 +32,10 @@ cargo install --path .
 ### Basic Usage
 
 ```bash
-# Scan a Solana program for security issues
+# Scan the current project for security issues (recursively)
+solsec scan
+
+# Scan a specific Solana program and set an output directory
 solsec scan ./my-solana-program --output ./results
 
 # Run fuzz testing
@@ -46,10 +49,10 @@ solsec report ./results --output report.html --format html
 
 ### `solsec scan`
 
-Run static analysis on your Solana smart contracts.
+Run static analysis on your Solana smart contracts. If no path is provided, it recursively scans the current directory for all `.rs` files, automatically ignoring `target/` and `.git/` folders.
 
 ```bash
-solsec scan <PATH> [OPTIONS]
+solsec scan [PATH] [OPTIONS]
 
 OPTIONS:
     -c, --config <FILE>          Configuration file path
@@ -58,9 +61,17 @@ OPTIONS:
         --fail-on-critical       Exit with non-zero code on critical issues [default: true]
 
 EXAMPLES:
+    # Scan the entire project recursively (default behavior)
+    solsec scan
+
+    # Scan a specific directory
     solsec scan ./programs/my-program
+    
+    # Scan with a configuration file and custom output directory
     solsec scan ./programs --config solsec.toml --output ./security-results
-    solsec scan ./target/idl/my_program.json --format html
+
+    # Scan a single file and output as HTML
+    solsec scan ./src/main.rs --format html
 ```
 
 ### `solsec fuzz`
