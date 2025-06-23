@@ -21,7 +21,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 # Error handling
 anyhow = "1.0"
-thiserror = "1.0"
+thiserror = "2.0"
 # Async runtime
 tokio = { version = "1.0", features = ["full"] }
 # File system operations
@@ -29,14 +29,14 @@ walkdir = "2.3"
 # Pattern matching and regex
 regex = "1.10"
 # Logging
-env_logger = "0.10"
+env_logger = "0.11"
 log = "0.4"
 # Template engine for HTML reports
-handlebars = "4.5"
+handlebars = "6.3"
 # Process execution
 tokio-process = "0.2"
 # Configuration
-config = "0.13"
+config = "0.15"
 # Plugin system
 libloading = "0.8"
 # Hash and crypto utilities
@@ -44,11 +44,11 @@ sha2 = "0.10"
 # Date and time
 chrono = { version = "0.4", features = ["serde"] }
 # HTTP client for fetching IDLs
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.12", features = ["json"] }
 # TOML parsing
 toml = "0.8"
 # Directory utilities
-dirs = "5.0"
+dirs = "6.0"
 
 [dev-dependencies]
 tempfile = "3.8"
