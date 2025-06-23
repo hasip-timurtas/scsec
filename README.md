@@ -37,7 +37,7 @@ cargo install --path .
 ### Basic Usage
 
 ```bash
-# Scan the current project (generates both JSON and HTML by default!)
+# Scan the current project and generates both JSON and HTML
 solsec scan
 
 # Scan a specific Solana program and set an output directory
