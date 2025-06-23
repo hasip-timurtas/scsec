@@ -10,6 +10,8 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 - **Plugin System**: Extensible architecture for custom security rules
 - **CI/CD Integration**: GitHub Actions support with automated security checks
 - **Professional Reports**: Beautiful HTML reports with severity rankings and actionable recommendations
+- **Smart Error Handling**: Clear, colored error messages with proper path validation
+- **Comprehensive Examples**: 8 educational examples demonstrating vulnerabilities and secure patterns
 
 ## 🚀 Quick Start
 
@@ -332,11 +334,41 @@ cargo test
 
 ## 📚 Examples
 
-Check out the [`examples/`](./examples/) directory for:
-- Sample Solana programs with vulnerabilities
-- Custom plugin implementations
-- CI/CD configuration templates
-- Integration with various development workflows
+The [`examples/`](./examples/) directory contains comprehensive security vulnerability demonstrations:
+
+### 🚨 Vulnerability Examples
+Each category includes both **vulnerable** and **secure** implementations for educational purposes:
+
+| Vulnerability Type | Severity | Vulnerable Examples | Secure Examples |
+|-------------------|----------|-------------------|-----------------|
+| **Integer Overflow** | Medium | `examples/integer_overflow/vulnerable.rs` | `examples/integer_overflow/secure.rs` |
+| **Missing Signer Check** | High | `examples/missing_signer_check/vulnerable.rs` | `examples/missing_signer_check/secure.rs` |
+| **Unchecked Account** | Critical | `examples/unchecked_account/vulnerable.rs` | `examples/unchecked_account/secure.rs` |
+| **Reentrancy** | High | `examples/reentrancy/vulnerable.rs` | `examples/reentrancy/secure.rs` |
+
+### 🧪 Testing the Examples
+
+```bash
+# Test vulnerable examples (should find many issues)
+solsec scan examples/integer_overflow/vulnerable.rs     # 5 issues found
+solsec scan examples/missing_signer_check/vulnerable.rs # 5 issues found
+solsec scan examples/unchecked_account/vulnerable.rs    # 6 issues found
+solsec scan examples/reentrancy/vulnerable.rs           # 2 issues found
+
+# Test secure examples (should find 0 issues)
+solsec scan examples/*/secure.rs                        # All pass!
+
+# Comprehensive analysis
+solsec scan examples/                                    # 26 total issues across all vulnerable examples
+```
+
+### 📖 Learning Resources
+- **Side-by-side Comparisons**: See exactly how to fix each vulnerability
+- **Real-world Patterns**: Actual Solana/Anchor code patterns
+- **Educational Comments**: Clear explanations of security issues
+- **Test Suite**: Validate that solsec detection works correctly
+
+See the detailed [`examples/README.md`](./examples/README.md) for complete documentation.
 
 ## 🤝 Community
 
