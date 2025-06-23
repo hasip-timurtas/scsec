@@ -43,10 +43,10 @@ solsec scan
 # Scan a specific Solana program and set an output directory
 solsec scan ./my-solana-program --output ./results
 
-# Generate only JSON (perfect for CI/CD)
+# Generate only JSON
 solsec scan ./my-program --json-only --output results.json
 
-# Generate only HTML (perfect for human review)
+# Generate only HTML
 solsec scan ./my-program --html-only --output results.html
 
 # Generate multiple formats at once
@@ -60,7 +60,7 @@ solsec fuzz ./my-solana-program --timeout 300
 
 ### `solsec scan`
 
-Run static analysis on your Solana smart contracts. **Now generates both JSON and HTML by default for the best UX!** If no path is provided, it recursively scans the current directory for all `.rs` files, automatically ignoring `target/` and `.git/` folders.
+Run static analysis on your Solana smart contracts. Generates both JSON and HTML If no path is provided, it recursively scans the current directory for all `.rs` files, automatically ignoring `target/` and `.git/` folders.
 
 ```bash
 solsec scan [PATH] [OPTIONS]
