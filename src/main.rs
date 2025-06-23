@@ -33,18 +33,20 @@ async fn main() -> Result<()> {
             format,
             json_only,
             html_only,
+            no_open,
             fail_on_critical,
         } => {
-            cli::handle_scan_command(
+            let scan_config = cli::ScanConfig {
                 path,
                 config,
                 output,
-                format,
+                formats: format,
                 json_only,
                 html_only,
+                no_open,
                 fail_on_critical,
-            )
-            .await
+            };
+            cli::handle_scan_command(scan_config).await
         }
         Commands::Fuzz {
             path,
