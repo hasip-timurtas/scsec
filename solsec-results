@@ -1,7 +1,7 @@
 {
   "metadata": {
     "generated_at": "2025-06-23T07:08:56.785705Z",
-    "solsec_version": "0.1.1",
+    "solsec_version": "0.1.2",
     "scan_target": "N/A",
     "total_files_scanned": 1,
     "scan_duration_ms": 0

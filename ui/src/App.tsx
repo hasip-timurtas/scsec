@@ -149,7 +149,7 @@ const App: React.FC = () => {
     const mockReport: SecurityReport = {
       metadata: {
         generated_at: new Date().toISOString(),
-        solsec_version: "0.1.1",
+        solsec_version: "0.1.2",
         total_files_scanned: 12,
       },
       summary: {
