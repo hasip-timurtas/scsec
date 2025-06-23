@@ -204,6 +204,66 @@ When adding new examples:
 4. Update this README with the new vulnerability type
 5. Include expected issue counts in your PR
 
+## 🔧 Safe Example Addition Guidelines
+
+### ✅ Best Practices for New Examples:
+
+1. **Follow Naming Convention:**
+   ```
+   examples/new_vulnerability_type/
+   ├── vulnerable.rs    # Contains intentional security flaws
+   └── secure.rs        # Shows proper implementation
+   ```
+
+2. **Test Detection Works:**
+   ```bash
+   # Verify vulnerable version triggers detection
+   solsec scan examples/new_vulnerability_type/vulnerable.rs
+   
+   # Verify secure version has minimal/no issues
+   solsec scan examples/new_vulnerability_type/secure.rs
+   ```
+
+3. **Document Expected Results:**
+   - Update the "Expected Results Summary" table
+   - Include issue counts and primary detection types
+   - Add learning objectives for the new vulnerability
+
+4. **Validate Integration:**
+   ```bash
+   # Test comprehensive scan still works
+   solsec scan examples/
+   
+   # Generate HTML report to verify formatting
+   solsec scan examples/ --format html --output test-report.html
+   ```
+
+### 🛡️ Why Examples Don't Break Core Functionality:
+
+- **Isolated Directory**: Examples live in `/examples` separate from core code
+- **Optional Scanning**: Users choose what to scan - can scan their own projects without examples
+- **Regression Testing**: Examples validate that security rules work correctly
+- **Configuration Support**: Can exclude examples using patterns in config:
+
+```toml
+[rule_settings.integer_overflow]
+ignore_patterns = [
+    "examples/*",  # Skip examples if desired
+    "test_*",
+    "*_test.rs"
+]
+```
+
+### 📊 Example Impact Analysis:
+
+| Aspect | Impact | Result |
+|--------|---------|---------|
+| **Core Scanner** | ✅ No impact | Works on any Rust code |
+| **Rule Engine** | ✅ Validates rules | Better testing coverage |
+| **Report Generation** | ✅ More content | Richer demonstration |
+| **User Experience** | ✅ Better learning | Educational value |
+| **CI/CD Integration** | ✅ Regression tests | Quality assurance |
+
 ---
 
 **⚠️ Warning:** The vulnerable examples contain intentional security flaws for educational purposes. **Never use vulnerable patterns in production code.** 
