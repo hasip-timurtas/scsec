@@ -44,10 +44,9 @@ solana-smart-contract-security-toolkit/
 
 ### CLI Commands
 
-1. **`solsec scan`** - Static analysis of Solana programs
+1. **`solsec scan`** - Static analysis of Solana programs (now generates JSON & HTML by default!)
 2. **`solsec fuzz`** - Automated fuzz testing with IDL generation
-3. **`solsec report`** - Generate reports in multiple formats (JSON, HTML, Markdown, CSV)
-4. **`solsec plugin`** - Manage security rule plugins
+3. **`solsec plugin`** - Manage security rule plugins
 
 ### Built-in Security Rules
 

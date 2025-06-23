@@ -31,19 +31,28 @@ async fn main() -> Result<()> {
             config,
             output,
             format,
+            json_only,
+            html_only,
             fail_on_critical,
-        } => cli::handle_scan_command(path, config, output, format, fail_on_critical).await,
+        } => {
+            cli::handle_scan_command(
+                path,
+                config,
+                output,
+                format,
+                json_only,
+                html_only,
+                fail_on_critical,
+            )
+            .await
+        }
         Commands::Fuzz {
             path,
             timeout,
             jobs,
             output,
         } => cli::handle_fuzz_command(path, timeout, jobs, output).await,
-        Commands::Report {
-            results,
-            output,
-            format,
-        } => cli::handle_report_command(results, output, format).await,
+
         Commands::Plugin { action, path } => cli::handle_plugin_command(action, path).await,
     }
 }

@@ -85,22 +85,14 @@ jobs:
 
     - name: Run security scan on self
       run: |
-        mkdir -p ./security-results
-        ./target/release/solsec scan ./src --output ./security-results/analysis.json --format json
-      continue-on-error: true
-    
-    - name: Generate security report
-      run: |
-        ./target/release/solsec report ./security-results --output ./security-report.html --format html
+        ./target/release/solsec scan ./src --output ./security-results
       continue-on-error: true
     
     - name: Upload security report
       uses: actions/upload-artifact@v4
       with:
         name: security-report
-        path: |
-          ./security-results/
-          ./security-report.html
+        path: ./security-results/
         retention-days: 30
     
     - name: Comment PR with security results

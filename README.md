@@ -1,5 +1,10 @@
 # 🛡️ Solana Smart Contract Security Toolkit (solsec)
 
+[![Crates.io](https://img.shields.io/crates/v/solsec.svg)](https://crates.io/crates/solsec)
+[![Downloads](https://img.shields.io/crates/d/solsec.svg)](https://crates.io/crates/solsec)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust](https://img.shields.io/badge/rust-2021-orange.svg)](https://www.rust-lang.org)
+
 A comprehensive security analysis tool for Solana smart contracts that helps developers identify vulnerabilities before deployment through static analysis and fuzz testing.
 
 ## ✨ Features
@@ -32,24 +37,30 @@ cargo install --path .
 ### Basic Usage
 
 ```bash
-# Scan the current project for security issues (recursively)
+# Scan the current project and generates both JSON and HTML
 solsec scan
 
 # Scan a specific Solana program and set an output directory
 solsec scan ./my-solana-program --output ./results
 
+# Generate only JSON
+solsec scan ./my-program --json-only --output results.json
+
+# Generate only HTML
+solsec scan ./my-program --html-only --output results.html
+
+# Generate multiple formats at once
+solsec scan ./my-program --format json,html,markdown,csv
+
 # Run fuzz testing
 solsec fuzz ./my-solana-program --timeout 300
-
-# Generate an HTML report
-solsec report ./results --output report.html --format html
 ```
 
 ## 📖 Commands
 
 ### `solsec scan`
 
-Run static analysis on your Solana smart contracts. If no path is provided, it recursively scans the current directory for all `.rs` files, automatically ignoring `target/` and `.git/` folders.
+Run static analysis on your Solana smart contracts. Generates both JSON and HTML If no path is provided, it recursively scans the current directory for all `.rs` files, automatically ignoring `target/` and `.git/` folders.
 
 ```bash
 solsec scan [PATH] [OPTIONS]
@@ -57,21 +68,29 @@ solsec scan [PATH] [OPTIONS]
 OPTIONS:
     -c, --config <FILE>          Configuration file path
     -o, --output <DIR>           Output directory [default: ./solsec-results]
-    -f, --format <FORMAT>        Output format [default: json] [possible values: json, html, markdown, csv]
+    -f, --format <FORMATS>       Output formats (comma-separated) [default: json,html] [possible values: json, html, markdown, csv]
+        --json-only              Only generate JSON (perfect for CI/CD)
+        --html-only              Only generate HTML (perfect for humans)
         --fail-on-critical       Exit with non-zero code on critical issues [default: true]
 
 EXAMPLES:
-    # Scan the entire project recursively (default behavior)
+    # Scan the entire project (generates both JSON and HTML!)
     solsec scan
 
-    # Scan a specific directory
+    # Scan a specific directory with default formats
     solsec scan ./programs/my-program
     
-    # Scan with a configuration file and custom output directory
-    solsec scan ./programs --config solsec.toml --output ./security-results
+    # Generate only JSON for CI/CD integration  
+    solsec scan ./programs --json-only --output results.json
 
-    # Scan a single file and output as HTML
-    solsec scan ./src/main.rs --format html
+    # Generate only HTML for manual review
+    solsec scan ./programs --html-only --output results.html
+
+    # Generate all available formats
+    solsec scan ./programs --format json,html,markdown,csv
+
+    # Legacy: Scan with configuration file
+    solsec scan ./programs --config solsec.toml --output ./security-results
 ```
 
 ### `solsec fuzz`
@@ -91,22 +110,7 @@ EXAMPLES:
     solsec fuzz ./programs --output ./custom-fuzz-results
 ```
 
-### `solsec report`
 
-Generate human-readable reports from analysis results.
-
-```bash
-solsec report <RESULTS> [OPTIONS]
-
-OPTIONS:
-    -o, --output <FILE>          Output file path [default: ./report.html]
-    -f, --format <FORMAT>        Report format [default: html] [possible values: json, html, markdown, csv]
-
-EXAMPLES:
-    solsec report ./solsec-results
-    solsec report ./results --output security-report.md --format markdown
-    solsec report ./results --format csv > issues.csv
-```
 
 ### `solsec plugin`
 
@@ -253,16 +257,13 @@ jobs:
     
     - name: Run security scan
       run: |
-        solsec scan ./programs --output ./security-results --format json
-        solsec report ./security-results --output ./security-report.html
+        solsec scan ./programs --output ./security-results
     
     - name: Upload security report
       uses: actions/upload-artifact@v3
       with:
         name: security-report
-        path: |
-          ./security-results/
-          ./security-report.html
+        path: ./security-results/
     
     - name: Fail on critical issues
       run: |
