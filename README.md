@@ -1,5 +1,10 @@
 # 🛡️ Solana Smart Contract Security Toolkit (solsec)
 
+[![Crates.io](https://img.shields.io/crates/v/solsec.svg)](https://crates.io/crates/solsec)
+[![Downloads](https://img.shields.io/crates/d/solsec.svg)](https://crates.io/crates/solsec)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust](https://img.shields.io/badge/rust-2021-orange.svg)](https://www.rust-lang.org)
+
 A comprehensive security analysis tool for Solana smart contracts that helps developers identify vulnerabilities before deployment through static analysis and fuzz testing.
 
 ## ✨ Features
