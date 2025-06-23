@@ -636,17 +636,23 @@ fn parse_instruction_payload(discriminator: u8, payload: &[u8]) -> Result<(), Bo
     async fn init_fuzz_targets(&self) -> Result<()> {
         let fuzz_dir = self.get_safe_fuzz_dir();
 
-        if !fuzz_dir.exists() {
-            info!("Initializing fuzz directory at: {}", fuzz_dir.display());
-            fs::create_dir_all(fuzz_dir.join("fuzz_targets"))
-                .context("Failed to create fuzz_targets dir")?;
-        }
+        // Always ensure the main fuzz directory exists
+        fs::create_dir_all(&fuzz_dir)
+            .with_context(|| format!("Failed to create fuzz directory: {}", fuzz_dir.display()))?;
+
+        // Always ensure the fuzz_targets subdirectory exists
+        let targets_dir = fuzz_dir.join("fuzz_targets");
+        fs::create_dir_all(&targets_dir).with_context(|| {
+            format!(
+                "Failed to create fuzz_targets directory: {}",
+                targets_dir.display()
+            )
+        })?;
 
         // Generate and write Cargo.toml, this will overwrite on every run to keep it updated
         self.write_fuzz_cargo_toml(&fuzz_dir)?;
 
         // Create/update target files
-        let targets_dir = fuzz_dir.join("fuzz_targets");
         for target in &self.targets {
             let target_file = targets_dir.join(format!("{}.rs", target.name));
             if !target_file.exists() {
