@@ -81,7 +81,7 @@ fi
 # 5. Update documentation in rules file
 if [ -f ".cursor/rules/rules.mdc" ]; then
     log_info "Updating version in documentation..."
-    sed -i.bak "s/Cargo.toml version**: $CURRENT_VERSION/Cargo.toml version**: $NEW_VERSION/" .cursor/rules/rules.mdc
+    sed -i.bak "s/Cargo.toml version\*\*: $CURRENT_VERSION/Cargo.toml version**: $NEW_VERSION/" .cursor/rules/rules.mdc
     rm .cursor/rules/rules.mdc.bak
     log_success "Updated documentation"
 fi
