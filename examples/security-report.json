@@ -1,0 +1,2629 @@
+{
+  "metadata": {
+    "generated_at": "2025-06-24T19:41:52.963375Z",
+    "solsec_version": "0.1.9",
+    "scan_target": "N/A",
+    "total_files_scanned": 12,
+    "scan_duration_ms": 0
+  },
+  "summary": {
+    "total_issues": 258,
+    "critical_issues": 7,
+    "high_issues": 20,
+    "medium_issues": 231,
+    "low_issues": 0,
+    "issues_by_rule": {
+      "missing_signer_check": 10,
+      "reentrancy": 9,
+      "unchecked_account": 22,
+      "integer_overflow": 217
+    },
+    "files_with_issues": [
+      "./src/fuzz.rs",
+      "./src/analyzer.rs",
+      "./examples/integer_overflow/vulnerable.rs",
+      "./src/plugin.rs",
+      "./src/report.rs",
+      "./examples/missing_signer_check/vulnerable.rs",
+      "./examples/reentrancy/vulnerable.rs",
+      "./examples/missing_signer_check/secure.rs",
+      "./examples/reentrancy/secure.rs",
+      "./examples/unchecked_account/vulnerable.rs",
+      "./src/cli.rs",
+      "./examples/unchecked_account/secure.rs"
+    ]
+  },
+  "analysis_results": [
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 176,
+      "column": null,
+      "code_snippet": "pub callback_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 187,
+      "column": null,
+      "code_snippet": "pub external_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 198,
+      "column": null,
+      "code_snippet": "pub hook_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 207,
+      "column": null,
+      "code_snippet": "pub external_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 213,
+      "column": null,
+      "code_snippet": "pub authority: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 37 after external call",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 31,
+      "column": null,
+      "code_snippet": "let result = invoke(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 72 after external call",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 66,
+      "column": null,
+      "code_snippet": "let result = invoke(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 110 after external call",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 104,
+      "column": null,
+      "code_snippet": "let result = invoke(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 148 after external call",
+      "file_path": "./examples/reentrancy/secure.rs",
+      "line_number": 140,
+      "column": null,
+      "code_snippet": "let result = invoke_signed(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 126,
+      "column": null,
+      "code_snippet": "pub callback_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 137,
+      "column": null,
+      "code_snippet": "pub external_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 148,
+      "column": null,
+      "code_snippet": "pub hook_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 157,
+      "column": null,
+      "code_snippet": "pub external_program: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 163,
+      "column": null,
+      "code_snippet": "pub authority: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 31 after external call",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 25,
+      "column": null,
+      "code_snippet": "invoke(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 55 after external call",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 49,
+      "column": null,
+      "code_snippet": "invoke(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 81 after external call",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 75,
+      "column": null,
+      "code_snippet": "invoke(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 111 after external call",
+      "file_path": "./examples/reentrancy/vulnerable.rs",
+      "line_number": 104,
+      "column": null,
+      "code_snippet": "invoke_signed(",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./examples/integer_overflow/vulnerable.rs",
+      "line_number": 11,
+      "column": null,
+      "code_snippet": "let result = a + b;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./examples/integer_overflow/vulnerable.rs",
+      "line_number": 18,
+      "column": null,
+      "code_snippet": "let total = amount * multiplier;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./examples/integer_overflow/vulnerable.rs",
+      "line_number": 31,
+      "column": null,
+      "code_snippet": "let total_cost = quantity * price_per_unit;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./examples/integer_overflow/vulnerable.rs",
+      "line_number": 34,
+      "column": null,
+      "code_snippet": "let fee = total_cost + 100;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'transfer_funds_handler' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/secure.rs",
+      "line_number": 10,
+      "column": null,
+      "code_snippet": "pub fn transfer_funds_handler(ctx: Context<TransferFunds>, amount: u64) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'transfer_funds_handler':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'admin_instruction' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/secure.rs",
+      "line_number": 33,
+      "column": null,
+      "code_snippet": "pub fn admin_instruction(ctx: Context<AdminAction>, new_admin: Pubkey) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'admin_instruction':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'withdraw_handler' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/secure.rs",
+      "line_number": 45,
+      "column": null,
+      "code_snippet": "pub fn withdraw_handler(ctx: Context<Withdraw>, amount: u64) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'withdraw_handler':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'update_price_instruction' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/secure.rs",
+      "line_number": 62,
+      "column": null,
+      "code_snippet": "pub fn update_price_instruction(ctx: Context<UpdatePrice>, new_price: u64) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'update_price_instruction':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'transfer_funds_handler' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/vulnerable.rs",
+      "line_number": 10,
+      "column": null,
+      "code_snippet": "pub fn transfer_funds_handler(ctx: Context<TransferFunds>, amount: u64) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'transfer_funds_handler':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'admin_instruction' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/vulnerable.rs",
+      "line_number": 22,
+      "column": null,
+      "code_snippet": "pub fn admin_instruction(ctx: Context<AdminAction>, new_admin: Pubkey) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'admin_instruction':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'withdraw_handler' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/vulnerable.rs",
+      "line_number": 29,
+      "column": null,
+      "code_snippet": "pub fn withdraw_handler(ctx: Context<Withdraw>, amount: u64) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'withdraw_handler':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'update_price_instruction' may be missing signer validation",
+      "file_path": "./examples/missing_signer_check/vulnerable.rs",
+      "line_number": 36,
+      "column": null,
+      "code_snippet": "pub fn update_price_instruction(ctx: Context<UpdatePrice>, new_price: u64) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'update_price_instruction':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./examples/unchecked_account/secure.rs",
+      "line_number": 131,
+      "column": null,
+      "code_snippet": "space = 8 + UserAccount::INIT_SPACE",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "critical",
+      "message": "Direct account data access followed by unsafe operations",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 15,
+      "column": null,
+      "code_snippet": "let account_data = account_info.try_borrow_data()?;",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "critical",
+      "message": "Direct account data access followed by unsafe operations",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 30,
+      "column": null,
+      "code_snippet": "let raw_data = account_info.try_borrow_data()?;",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "critical",
+      "message": "Direct account data access followed by unsafe operations",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 66,
+      "column": null,
+      "code_snippet": "let data = account_info.try_borrow_data()?;",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "critical",
+      "message": "Unsafe pointer operation on account data without validation",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 68,
+      "column": null,
+      "code_snippet": "let balance = unsafe { *(data.as_ptr() as *const u64) };",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 79,
+      "column": null,
+      "code_snippet": "pub target_account: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 85,
+      "column": null,
+      "code_snippet": "pub data_account: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 92,
+      "column": null,
+      "code_snippet": "pub target_account: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "medium",
+      "message": "AccountInfo used without type validation - consider using Account<T>",
+      "file_path": "./examples/unchecked_account/vulnerable.rs",
+      "line_number": 98,
+      "column": null,
+      "code_snippet": "pub unknown_account: AccountInfo<'info>,",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 310,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 377,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 460,
+      "column": null,
+      "code_snippet": "lines.iter().skip(line_num + 1).take(3).any(|l| l.contains(\"unsafe\")))",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 472,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 513,
+      "column": null,
+      "code_snippet": "for (offset, check_line) in lines.iter().skip(line_num + 1).take(10).enumerate() {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 531,
+      "column": null,
+      "code_snippet": "state_change_line = line_num + 1 + offset;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 541,
+      "column": null,
+      "code_snippet": "state_change_line + 1",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 543,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 587,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 598,
+      "column": null,
+      "code_snippet": "for check_line in lines.iter().skip(line_num + 1).take(5) {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 609,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 668,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 685,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 734,
+      "column": null,
+      "code_snippet": "message: \"Division operation without zero check - could panic\".to_string(),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 735,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 751,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 793,
+      "column": null,
+      "code_snippet": "for check_line in lines.iter().skip(line_num + 1).take(10) {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 809,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 825,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 869,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 913,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 957,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1000,
+      "column": null,
+      "code_snippet": "let result = a + b; // This should trigger integer_overflow rule",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1032,
+      "column": null,
+      "code_snippet": "let result = a + b; // Potential overflow",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1104,
+      "column": null,
+      "code_snippet": "let result = a + b;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1133,
+      "column": null,
+      "code_snippet": "a + b",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'instruction_handler' may be missing signer validation",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1004,
+      "column": null,
+      "code_snippet": "pub fn instruction_handler(ctx: Context<Transfer>) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'instruction_handler':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "missing_signer_check",
+      "severity": "high",
+      "message": "Instruction handler 'insecure_handler' may be missing signer validation",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1159,
+      "column": null,
+      "code_snippet": "pub fn insecure_handler(ctx: Context<Transfer>) -> Result<()> {",
+      "suggestion": "Add signer validation to function 'insecure_handler':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "critical",
+      "message": "Dangerous unsafe transmute of AccountInfo without validation",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 426,
+      "column": null,
+      "code_snippet": "if line.contains(\"mem::transmute\") && line.contains(\"AccountInfo\") {",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "high",
+      "message": "Account marked as dangerous requiring manual validation",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 442,
+      "column": null,
+      "code_snippet": "else if line.contains(\"/// CHECK:\") && line.contains(\"dangerous\") {",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "critical",
+      "message": "Direct account data access followed by unsafe operations",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 457,
+      "column": null,
+      "code_snippet": "else if line.contains(\"try_borrow_data\")",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "unchecked_account",
+      "severity": "critical",
+      "message": "Dangerous unsafe transmute of AccountInfo without validation",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1186,
+      "column": null,
+      "code_snippet": "let account: AccountInfo = unsafe { mem::transmute(data) };",
+      "suggestion": "Add proper account validation and use typed Account<T> instead of AccountInfo"
+    },
+    {
+      "rule_name": "reentrancy",
+      "severity": "high",
+      "message": "Potential reentrancy: state changes at line 1219 after external call",
+      "file_path": "./src/analyzer.rs",
+      "line_number": 1218,
+      "column": null,
+      "code_snippet": "invoke(&instruction, &accounts)?;",
+      "suggestion": "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 219,
+      "column": null,
+      "code_snippet": "recommendations.push(format!(\"Consider using checked arithmetic operations for {} overflow-prone locations.\", count));",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 343,
+      "column": null,
+      "code_snippet": "<meta charset=\"UTF-8\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 344,
+      "column": null,
+      "code_snippet": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 347,
+      "column": null,
+      "code_snippet": "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; margin: 0; padding: 20px; background: #f5f5f5; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 348,
+      "column": null,
+      "code_snippet": ".container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 349,
+      "column": null,
+      "code_snippet": ".header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 351,
+      "column": null,
+      "code_snippet": ".summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 352,
+      "column": null,
+      "code_snippet": ".stat-card {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 355,
+      "column": null,
+      "code_snippet": "border-radius: 8px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 356,
+      "column": null,
+      "code_snippet": "text-align: center;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 361,
+      "column": null,
+      "code_snippet": ".stat-card:hover {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 364,
+      "column": null,
+      "code_snippet": "box-shadow: 0 4px 12px rgba(0,0,0,0.15);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 366,
+      "column": null,
+      "code_snippet": ".stat-card.clickable {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 369,
+      "column": null,
+      "code_snippet": ".stat-card.clickable:hover {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 370,
+      "column": null,
+      "code_snippet": "border-color: #007bff;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 372,
+      "column": null,
+      "code_snippet": ".stat-card:not(.clickable) {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 373,
+      "column": null,
+      "code_snippet": "cursor: not-allowed;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 375,
+      "column": null,
+      "code_snippet": ".stat-number { font-size: 2em; font-weight: bold; margin-bottom: 5px; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 381,
+      "column": null,
+      "code_snippet": "border-left: 4px solid #dee2e6;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 385,
+      "column": null,
+      "code_snippet": "border-radius: 4px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 388,
+      "column": null,
+      "code_snippet": ".issue.critical { border-left-color: #dc3545; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 389,
+      "column": null,
+      "code_snippet": ".issue.high { border-left-color: #fd7e14; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 390,
+      "column": null,
+      "code_snippet": ".issue.medium { border-left-color: #ffc107; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 391,
+      "column": null,
+      "code_snippet": ".issue.low { border-left-color: #28a745; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 394,
+      "column": null,
+      "code_snippet": "margin-top: 0;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 395,
+      "column": null,
+      "code_snippet": "margin-bottom: 12px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 399,
+      "column": null,
+      "code_snippet": "margin-bottom: 8px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 404,
+      "column": null,
+      "code_snippet": "border-radius: 6px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 405,
+      "column": null,
+      "code_snippet": "font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 409,
+      "column": null,
+      "code_snippet": "font-size: 0.9em;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 410,
+      "column": null,
+      "code_snippet": "line-height: 1.4;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 411,
+      "column": null,
+      "code_snippet": "overflow-x: auto;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 412,
+      "column": null,
+      "code_snippet": "box-shadow: 0 1px 3px rgba(0,0,0,0.1);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 416,
+      "column": null,
+      "code_snippet": ".code .keyword { color: #d73a49 !important; font-weight: 600; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 418,
+      "column": null,
+      "code_snippet": ".code .comment { color: #6a737d !important; font-style: italic; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 424,
+      "column": null,
+      "code_snippet": ".recommendations { background: #e3f2fd; padding: 20px; border-radius: 8px; margin-top: 30px; }",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 427,
+      "column": null,
+      "code_snippet": ".severity-section {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 430,
+      "column": null,
+      "code_snippet": "border-radius: 8px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 434,
+      "column": null,
+      "code_snippet": ".severity-header {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 435,
+      "column": null,
+      "code_snippet": "font-size: 1.4em;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 436,
+      "column": null,
+      "code_snippet": "font-weight: 600;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 437,
+      "column": null,
+      "code_snippet": "margin-bottom: 20px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 439,
+      "column": null,
+      "code_snippet": "border-radius: 6px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 441,
+      "column": null,
+      "code_snippet": "border-left: 4px solid;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 442,
+      "column": null,
+      "code_snippet": "box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 444,
+      "column": null,
+      "code_snippet": ".severity-header.critical {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 445,
+      "column": null,
+      "code_snippet": "border-left-color: #dc3545;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 446,
+      "column": null,
+      "code_snippet": "background: linear-gradient(90deg, #fff5f5 0%, #ffffff 100%);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 448,
+      "column": null,
+      "code_snippet": ".severity-header.high {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 449,
+      "column": null,
+      "code_snippet": "border-left-color: #fd7e14;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 450,
+      "column": null,
+      "code_snippet": "background: linear-gradient(90deg, #fff7ed 0%, #ffffff 100%);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 452,
+      "column": null,
+      "code_snippet": ".severity-header.medium {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 453,
+      "column": null,
+      "code_snippet": "border-left-color: #ffc107;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 454,
+      "column": null,
+      "code_snippet": "background: linear-gradient(90deg, #fffbf0 0%, #ffffff 100%);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 456,
+      "column": null,
+      "code_snippet": ".severity-header.low {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 457,
+      "column": null,
+      "code_snippet": "border-left-color: #28a745;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 458,
+      "column": null,
+      "code_snippet": "background: linear-gradient(90deg, #f0fff4 0%, #ffffff 100%);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 460,
+      "column": null,
+      "code_snippet": ".severity-badge {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 461,
+      "column": null,
+      "code_snippet": "display: inline-block;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 463,
+      "column": null,
+      "code_snippet": "border-radius: 4px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 464,
+      "column": null,
+      "code_snippet": "font-size: 0.85em;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 465,
+      "column": null,
+      "code_snippet": "font-weight: 600;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 466,
+      "column": null,
+      "code_snippet": "text-transform: uppercase;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 469,
+      "column": null,
+      "code_snippet": ".severity-badge.critical {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 472,
+      "column": null,
+      "code_snippet": ".severity-badge.high {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 475,
+      "column": null,
+      "code_snippet": ".severity-badge.medium {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 479,
+      "column": null,
+      "code_snippet": ".severity-badge.low {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 484,
+      "column": null,
+      "code_snippet": ".suggestion-container {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 487,
+      "column": null,
+      "code_snippet": "border-radius: 8px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 490,
+      "column": null,
+      "code_snippet": "box-shadow: 0 1px 3px rgba(0,0,0,0.1);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 492,
+      "column": null,
+      "code_snippet": ".suggestion-header {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 494,
+      "column": null,
+      "code_snippet": "align-items: center;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 495,
+      "column": null,
+      "code_snippet": "margin-bottom: 12px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 496,
+      "column": null,
+      "code_snippet": "font-weight: 600;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 499,
+      "column": null,
+      "code_snippet": ".suggestion-icon {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 500,
+      "column": null,
+      "code_snippet": "margin-right: 8px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 501,
+      "column": null,
+      "code_snippet": "font-size: 1.2em;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 503,
+      "column": null,
+      "code_snippet": ".suggestion-content {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 504,
+      "column": null,
+      "code_snippet": "line-height: 1.6;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 506,
+      "column": null,
+      "code_snippet": ".suggestion-option {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 509,
+      "column": null,
+      "code_snippet": "border-radius: 6px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 512,
+      "column": null,
+      "code_snippet": "box-shadow: 0 1px 2px rgba(0,0,0,0.05);",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 514,
+      "column": null,
+      "code_snippet": ".suggestion-option-title {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 515,
+      "column": null,
+      "code_snippet": "font-weight: 600;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 517,
+      "column": null,
+      "code_snippet": "margin-bottom: 8px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 519,
+      "column": null,
+      "code_snippet": "align-items: center;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 521,
+      "column": null,
+      "code_snippet": ".option-number {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 524,
+      "column": null,
+      "code_snippet": "border-radius: 50%;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 527,
+      "column": null,
+      "code_snippet": "display: inline-flex;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 528,
+      "column": null,
+      "code_snippet": "align-items: center;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 529,
+      "column": null,
+      "code_snippet": "justify-content: center;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 530,
+      "column": null,
+      "code_snippet": "font-size: 0.8em;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 531,
+      "column": null,
+      "code_snippet": "margin-right: 8px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 533,
+      "column": null,
+      "code_snippet": ".before-after {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 535,
+      "column": null,
+      "code_snippet": "grid-template-columns: 1fr 1fr;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 539,
+      "column": null,
+      "code_snippet": ".before-after-item {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 541,
+      "column": null,
+      "code_snippet": "border-radius: 4px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 544,
+      "column": null,
+      "code_snippet": ".before-after-label {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 545,
+      "column": null,
+      "code_snippet": "font-size: 0.85em;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 546,
+      "column": null,
+      "code_snippet": "font-weight: 600;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 547,
+      "column": null,
+      "code_snippet": "margin-bottom: 4px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 548,
+      "column": null,
+      "code_snippet": "text-transform: uppercase;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 549,
+      "column": null,
+      "code_snippet": "letter-spacing: 0.5px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 551,
+      "column": null,
+      "code_snippet": ".before-label {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 554,
+      "column": null,
+      "code_snippet": ".after-label {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 557,
+      "column": null,
+      "code_snippet": ".code-example {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 560,
+      "column": null,
+      "code_snippet": "border-radius: 4px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 562,
+      "column": null,
+      "code_snippet": "font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 563,
+      "column": null,
+      "code_snippet": "font-size: 0.9em;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 565,
+      "column": null,
+      "code_snippet": "overflow-x: auto;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 567,
+      "column": null,
+      "code_snippet": ".simple-suggestion {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 569,
+      "column": null,
+      "code_snippet": "border-left: 4px solid #007bff;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 571,
+      "column": null,
+      "code_snippet": "border-radius: 4px;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 572,
+      "column": null,
+      "code_snippet": "font-style: italic;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 575,
+      "column": null,
+      "code_snippet": "@media (max-width: 768px) {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 576,
+      "column": null,
+      "code_snippet": ".before-after {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 577,
+      "column": null,
+      "code_snippet": "grid-template-columns: 1fr;",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 591,
+      "column": null,
+      "code_snippet": "<div class=\"stat-card clickable\" data-target=\"all-issues\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 592,
+      "column": null,
+      "code_snippet": "<div class=\"stat-number\">{{summary.total_issues}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 595,
+      "column": null,
+      "code_snippet": "<div class=\"stat-card {{#if summary.critical_issues}}clickable{{/if}}\" {{#if summary.critical_issues}}data-target=\"critical-issues\"{{/if}} {{#unless summary.critical_issues}}style=\"opacity: 0.5; cursor: default;\"{{/unless}}>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 596,
+      "column": null,
+      "code_snippet": "<div class=\"stat-number critical\">{{summary.critical_issues}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 599,
+      "column": null,
+      "code_snippet": "<div class=\"stat-card {{#if summary.high_issues}}clickable{{/if}}\" {{#if summary.high_issues}}data-target=\"high-issues\"{{/if}} {{#unless summary.high_issues}}style=\"opacity: 0.5; cursor: default;\"{{/unless}}>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 600,
+      "column": null,
+      "code_snippet": "<div class=\"stat-number high\">{{summary.high_issues}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 603,
+      "column": null,
+      "code_snippet": "<div class=\"stat-card {{#if summary.medium_issues}}clickable{{/if}}\" {{#if summary.medium_issues}}data-target=\"medium-issues\"{{/if}} {{#unless summary.medium_issues}}style=\"opacity: 0.5; cursor: default;\"{{/unless}}>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 604,
+      "column": null,
+      "code_snippet": "<div class=\"stat-number medium\">{{summary.medium_issues}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 607,
+      "column": null,
+      "code_snippet": "<div class=\"stat-card {{#if summary.low_issues}}clickable{{/if}}\" {{#if summary.low_issues}}data-target=\"low-issues\"{{/if}} {{#unless summary.low_issues}}style=\"opacity: 0.5; cursor: default;\"{{/unless}}>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 608,
+      "column": null,
+      "code_snippet": "<div class=\"stat-number low\">{{summary.low_issues}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 614,
+      "column": null,
+      "code_snippet": "<h2 id=\"all-issues\">🔍 Security Issues</h2>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 618,
+      "column": null,
+      "code_snippet": "<div id=\"critical-issues\" class=\"severity-section\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 619,
+      "column": null,
+      "code_snippet": "<h3 class=\"severity-header critical\">🚨 Critical Issues ({{summary.critical_issues}})</h3>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 625,
+      "column": null,
+      "code_snippet": "<p><strong>Severity:</strong> <span class=\"severity-badge critical\">{{severity}}</span></p>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 631,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-container\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 632,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-header\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 633,
+      "column": null,
+      "code_snippet": "<span class=\"suggestion-icon\">💡</span>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 636,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-content\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 637,
+      "column": null,
+      "code_snippet": "<div id=\"suggestion-{{@index}}\" class=\"suggestion-text\">{{suggestion}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 649,
+      "column": null,
+      "code_snippet": "<div id=\"high-issues\" class=\"severity-section\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 650,
+      "column": null,
+      "code_snippet": "<h3 class=\"severity-header high\">⚠️ High Severity Issues ({{summary.high_issues}})</h3>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 656,
+      "column": null,
+      "code_snippet": "<p><strong>Severity:</strong> <span class=\"severity-badge high\">{{severity}}</span></p>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 662,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-container\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 663,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-header\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 664,
+      "column": null,
+      "code_snippet": "<span class=\"suggestion-icon\">💡</span>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 667,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-content\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 668,
+      "column": null,
+      "code_snippet": "<div id=\"suggestion-{{@index}}\" class=\"suggestion-text\">{{suggestion}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 680,
+      "column": null,
+      "code_snippet": "<div id=\"medium-issues\" class=\"severity-section\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 681,
+      "column": null,
+      "code_snippet": "<h3 class=\"severity-header medium\">🔶 Medium Severity Issues ({{summary.medium_issues}})</h3>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 687,
+      "column": null,
+      "code_snippet": "<p><strong>Severity:</strong> <span class=\"severity-badge medium\">{{severity}}</span></p>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 693,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-container\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 694,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-header\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 695,
+      "column": null,
+      "code_snippet": "<span class=\"suggestion-icon\">💡</span>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 698,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-content\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 699,
+      "column": null,
+      "code_snippet": "<div id=\"suggestion-{{@index}}\" class=\"suggestion-text\">{{suggestion}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 711,
+      "column": null,
+      "code_snippet": "<div id=\"low-issues\" class=\"severity-section\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 712,
+      "column": null,
+      "code_snippet": "<h3 class=\"severity-header low\">🔵 Low Severity Issues ({{summary.low_issues}})</h3>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 718,
+      "column": null,
+      "code_snippet": "<p><strong>Severity:</strong> <span class=\"severity-badge low\">{{severity}}</span></p>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 724,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-container\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 725,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-header\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 726,
+      "column": null,
+      "code_snippet": "<span class=\"suggestion-icon\">💡</span>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 729,
+      "column": null,
+      "code_snippet": "<div class=\"suggestion-content\">",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 730,
+      "column": null,
+      "code_snippet": "<div id=\"suggestion-{{@index}}\" class=\"suggestion-text\">{{suggestion}}</div>",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 772,
+      "column": null,
+      "code_snippet": "const sections = document.querySelectorAll('.severity-section');",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 781,
+      "column": null,
+      "code_snippet": "document.querySelectorAll('.stat-card.clickable').forEach(function(card) {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 784,
+      "column": null,
+      "code_snippet": "const target = this.getAttribute('data-target');",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 789,
+      "column": null,
+      "code_snippet": "console.log('No data-target found on clicked card');",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 798,
+      "column": null,
+      "code_snippet": "document.querySelectorAll('.suggestion-text').forEach(function(element) {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 806,
+      "column": null,
+      "code_snippet": "element.innerHTML = '<div class=\"simple-suggestion\">' + text + '</div>';",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 811,
+      "column": null,
+      "code_snippet": "document.querySelectorAll('.code-example').forEach(function(element) {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 886,
+      "column": null,
+      "code_snippet": "return '<div class=\"simple-suggestion\">' + escapeHtml(text) + '</div>';",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/report.rs",
+      "line_number": 940,
+      "column": null,
+      "code_snippet": "code = code.replace(/\\b([A-Z][a-zA-Z0-9_]*)\\b/g, '<span class=\"type\">$1</span>');",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 89,
+      "column": null,
+      "code_snippet": ".unwrap_or_else(|| std::ffi::OsStr::new(\"solsec-fuzz\")),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 358,
+      "column": null,
+      "code_snippet": "if data.is_empty() || data.len() > 1024 * 1024 {{",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 457,
+      "column": null,
+      "code_snippet": "if data.len() > 64 * 1024 {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 610,
+      "column": null,
+      "code_snippet": "debug!(\"Checking if cargo-fuzz is installed\");",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 616,
+      "column": null,
+      "code_snippet": "debug!(\"cargo-fuzz is already installed\");",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 620,
+      "column": null,
+      "code_snippet": "info!(\"Installing cargo-fuzz...\");",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 622,
+      "column": null,
+      "code_snippet": ".args([\"install\", \"cargo-fuzz\"])",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 627,
+      "column": null,
+      "code_snippet": "return Err(anyhow::anyhow!(\"Failed to install cargo-fuzz\"));",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 630,
+      "column": null,
+      "code_snippet": "info!(\"cargo-fuzz installed successfully\");",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 680,
+      "column": null,
+      "code_snippet": "name = \"solsec-fuzz\"",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 686,
+      "column": null,
+      "code_snippet": "cargo-fuzz = true",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/fuzz.rs",
+      "line_number": 689,
+      "column": null,
+      "code_snippet": "libfuzzer-sys = \"0.4\"",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/plugin.rs",
+      "line_number": 31,
+      "column": null,
+      "code_snippet": "pub trait Rule: Send + Sync + std::fmt::Debug {",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/plugin.rs",
+      "line_number": 237,
+      "column": null,
+      "code_snippet": "line_number: Some(line_num + 1),",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/cli.rs",
+      "line_number": 46,
+      "column": null,
+      "code_snippet": "#[arg(short, long, default_value = \"./solsec-results\")]",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/cli.rs",
+      "line_number": 85,
+      "column": null,
+      "code_snippet": "#[arg(short, long, default_value = \"./solsec-fuzz\")]",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    },
+    {
+      "rule_name": "integer_overflow",
+      "severity": "medium",
+      "message": "Potential integer overflow. Consider using checked arithmetic operations.",
+      "file_path": "./src/cli.rs",
+      "line_number": 137,
+      "column": null,
+      "code_snippet": "config.output.join(format!(\"security-report.{}\", extension))",
+      "suggestion": "Use checked_add(), checked_sub(), or checked_mul()"
+    }
+  ],
+  "fuzz_results": null,
+  "recommendations": [
+    "🚨 URGENT: 7 critical security issues found. Address these immediately before deployment.",
+    "⚠️  20 high-severity issues require attention.",
+    "Consider using checked arithmetic operations for 217 overflow-prone locations.",
+    "Implement proper account validation for 22 locations.",
+    "Add signer validation to 10 instruction handlers.",
+    "Review 9 potential reentrancy vulnerabilities and implement guards.",
+    "Run tests after fixing issues to ensure functionality is preserved.",
+    "Consider setting up CI/CD integration to catch issues early."
+  ]
+}

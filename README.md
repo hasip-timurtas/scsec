@@ -427,6 +427,13 @@ Revolutionary interactive HTML reports with:
 - **Copy-Paste Ready Code**: Immediately usable code snippets for each suggested fix
 - **Mobile Optimization**: Responsive design that works perfectly on all devices
 
+**🔗 Live Example**: Check out [`examples/security-report.html`](./examples/security-report.html) to see a complete security report generated from scanning the example vulnerabilities. This report shows:
+- **258 total issues** found across all severity levels
+- **7 critical issues** requiring immediate attention
+- **Interactive navigation** with clickable severity cards
+- **Syntax-highlighted code** with proper Rust highlighting
+- **Multi-option suggestions** with numbered implementation approaches
+
 ### JSON Report
 Machine-readable format for:
 - CI/CD pipeline integration

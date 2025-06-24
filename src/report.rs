@@ -363,20 +363,64 @@ const HTML_TEMPLATE: &str = r#"
             transform: translateY(-2px); 
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
         }
+        .stat-card.clickable { 
+            cursor: pointer; 
+        }
         .stat-card.clickable:hover { 
             border-color: #007bff; 
+        }
+        .stat-card:not(.clickable) { 
+            cursor: not-allowed; 
         }
         .stat-number { font-size: 2em; font-weight: bold; margin-bottom: 5px; }
         .critical { color: #dc3545; }
         .high { color: #fd7e14; }
         .medium { color: #ffc107; }
         .low { color: #28a745; }
-        .issue { border-left: 4px solid #dee2e6; margin: 10px 0; padding: 15px; background: #f8f9fa; border-radius: 4px; }
+        .issue { 
+            border-left: 4px solid #dee2e6; 
+            margin: 10px 0; 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border-radius: 4px; 
+            color: #495057;
+        }
         .issue.critical { border-left-color: #dc3545; }
         .issue.high { border-left-color: #fd7e14; }
         .issue.medium { border-left-color: #ffc107; }
         .issue.low { border-left-color: #28a745; }
-        .code { background: #f1f3f4; padding: 10px; border-radius: 4px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; margin: 10px 0; }
+        .issue h4 { 
+            color: #212529; 
+            margin-top: 0; 
+            margin-bottom: 12px; 
+        }
+        .issue p { 
+            color: #495057; 
+            margin-bottom: 8px; 
+        }
+        .code { 
+            background: #f8f9fa; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; 
+            margin: 10px 0; 
+            border: 1px solid #e9ecef;
+            color: #495057 !important;
+            font-size: 0.9em;
+            line-height: 1.4;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Syntax highlighting for code */
+        .code .keyword { color: #d73a49 !important; font-weight: 600; }
+        .code .string { color: #032f62 !important; }
+        .code .comment { color: #6a737d !important; font-style: italic; }
+        .code .number { color: #005cc5 !important; }
+        .code .function { color: #6f42c1 !important; }
+        .code .type { color: #e36209 !important; }
+        .code .operator { color: #d73a49 !important; }
+        .code .punctuation { color: #586069 !important; }
         .recommendations { background: #e3f2fd; padding: 20px; border-radius: 8px; margin-top: 30px; }
         
         /* Severity Section Styles */
@@ -544,23 +588,23 @@ const HTML_TEMPLATE: &str = r#"
         
         <div class="content">
             <div class="summary">
-                <div class="stat-card" onclick="scrollToSection('all-issues')">
+                <div class="stat-card clickable" data-target="all-issues">
                     <div class="stat-number">{{summary.total_issues}}</div>
                     <div>Total Issues</div>
                 </div>
-                <div class="stat-card clickable" onclick="scrollToSection('critical-issues')" {{#unless summary.critical_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
+                <div class="stat-card {{#if summary.critical_issues}}clickable{{/if}}" {{#if summary.critical_issues}}data-target="critical-issues"{{/if}} {{#unless summary.critical_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number critical">{{summary.critical_issues}}</div>
                     <div>Critical</div>
                 </div>
-                <div class="stat-card clickable" onclick="scrollToSection('high-issues')" {{#unless summary.high_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
+                <div class="stat-card {{#if summary.high_issues}}clickable{{/if}}" {{#if summary.high_issues}}data-target="high-issues"{{/if}} {{#unless summary.high_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number high">{{summary.high_issues}}</div>
                     <div>High</div>
                 </div>
-                <div class="stat-card clickable" onclick="scrollToSection('medium-issues')" {{#unless summary.medium_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
+                <div class="stat-card {{#if summary.medium_issues}}clickable{{/if}}" {{#if summary.medium_issues}}data-target="medium-issues"{{/if}} {{#unless summary.medium_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number medium">{{summary.medium_issues}}</div>
                     <div>Medium</div>
                 </div>
-                <div class="stat-card clickable" onclick="scrollToSection('low-issues')" {{#unless summary.low_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
+                <div class="stat-card {{#if summary.low_issues}}clickable{{/if}}" {{#if summary.low_issues}}data-target="low-issues"{{/if}} {{#unless summary.low_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number low">{{summary.low_issues}}</div>
                     <div>Low</div>
                 </div>
@@ -705,11 +749,13 @@ const HTML_TEMPLATE: &str = r#"
         </div>
     </div>
     
-    <script>
-        // Smooth scrolling function for navigation
+        <script>
+        // Smooth scrolling function for navigation (must be global for onclick)
         function scrollToSection(sectionId) {
+            console.log('Attempting to scroll to section:', sectionId);
             const element = document.getElementById(sectionId);
             if (element) {
+                console.log('Element found, scrolling to:', element);
                 element.scrollIntoView({ 
                     behavior: 'smooth', 
                     block: 'start',
@@ -720,11 +766,35 @@ const HTML_TEMPLATE: &str = r#"
                 setTimeout(() => {
                     element.style.boxShadow = '';
                 }, 2000);
+            } else {
+                console.error('Element not found with ID:', sectionId);
+                // Fallback: try to find section by class or other means
+                const sections = document.querySelectorAll('.severity-section');
+                console.log('Available sections:', sections);
             }
         }
-
-        // Enhanced suggestion formatting
+        
+        // Enhanced suggestion formatting and syntax highlighting
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // Add event listeners for navigation cards
+            document.querySelectorAll('.stat-card.clickable').forEach(function(card) {
+                card.addEventListener('click', function(e) {
+                    console.log('Card clicked:', this);
+                    const target = this.getAttribute('data-target');
+                    if (target) {
+                        console.log('Scrolling to target:', target);
+                        scrollToSection(target);
+                    } else {
+                        console.log('No data-target found on clicked card');
+                    }
+                });
+            });
+            // Apply syntax highlighting to all code blocks
+            document.querySelectorAll('.code').forEach(function(element) {
+                highlightRustCode(element);
+            });
+            
             document.querySelectorAll('.suggestion-text').forEach(function(element) {
                 const text = element.textContent;
                 
@@ -735,6 +805,11 @@ const HTML_TEMPLATE: &str = r#"
                     // Simple suggestion
                     element.innerHTML = '<div class="simple-suggestion">' + text + '</div>';
                 }
+            });
+            
+            // Apply syntax highlighting to code examples in suggestions
+            document.querySelectorAll('.code-example').forEach(function(element) {
+                highlightRustCode(element);
             });
         });
         
@@ -815,6 +890,71 @@ const HTML_TEMPLATE: &str = r#"
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+        
+        function highlightRustCode(element) {
+            // Get the raw text content (not HTML)
+            let code = element.textContent || element.innerText;
+            
+            // If already highlighted, skip
+            if (element.querySelector('.keyword')) {
+                return;
+            }
+            
+            // Escape HTML first to prevent conflicts
+            code = escapeHtml(code);
+            
+            // Apply syntax highlighting in order (strings and comments first to protect them)
+            
+            // 1. String literals first (to protect them from other replacements)
+            code = code.replace(/"[^"\\]*(?:\\.[^"\\]*)*"/g, '<span class="string">$&</span>');
+            code = code.replace(/'[^'\\]*(?:\\.[^'\\]*)*'/g, '<span class="string">$&</span>');
+            
+            // 2. Comments (to protect them from other replacements)
+            code = code.replace(/\/\/[^\n\r]*/g, '<span class="comment">$&</span>');
+            code = code.replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>');
+            
+            // 3. Keywords (but only outside strings and comments)
+            const keywords = [
+                'let', 'mut', 'fn', 'if', 'else', 'match', 'for', 'while', 'loop', 'break', 'continue',
+                'return', 'pub', 'mod', 'use', 'struct', 'enum', 'impl', 'trait', 'type', 'const',
+                'static', 'unsafe', 'async', 'await', 'move', 'ref', 'in', 'where', 'as', 'dyn',
+                'true', 'false', 'Some', 'None', 'Ok', 'Err', 'Result', 'Option'
+            ];
+            
+            keywords.forEach(function(keyword) {
+                // Replace keywords
+                code = code.replace(
+                    new RegExp('\\b(' + keyword + ')\\b', 'g'),
+                    '<span class="keyword">$1</span>'
+                );
+            });
+            
+            // 4. Numbers (but only outside strings/comments/existing spans)
+            code = code.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="number">$1</span>');
+            
+            // 5. Function calls (word followed by opening parenthesis)
+            code = code.replace(/\b(\w+)(\s*\()/g, '<span class="function">$1</span>$2');
+            
+            // 6. Types (capitalized identifiers)
+            code = code.replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g, '<span class="type">$1</span>');
+            
+            // 7. Simple operators (just the most common ones to avoid conflicts)
+            const simpleOps = [
+                { pattern: '->', replacement: '<span class="operator">-></span>' },
+                { pattern: '=>', replacement: '<span class="operator">=></span>' },
+                { pattern: '==', replacement: '<span class="operator">==</span>' },
+                { pattern: '!=', replacement: '<span class="operator">!=</span>' }
+            ];
+            
+            simpleOps.forEach(function(op) {
+                code = code.replace(
+                    new RegExp(op.pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+                    op.replacement
+                );
+            });
+            
+            element.innerHTML = code;
         }
     </script>
 </body>
