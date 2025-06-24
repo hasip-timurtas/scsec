@@ -1,118 +1,117 @@
-# Version Management Scripts
+# Scripts Directory
 
-This directory contains scripts for managing version updates across the solsec project.
+This directory contains automation scripts for **solsec** development and version management.
 
-## Best Practices for Version Management
+## Available Scripts
 
-### Option 1: Automated Script (Recommended)
+### 🧪 `run-tests.sh`
+**Purpose**: Comprehensive testing script that runs all project quality checks required by CI.
 
-Use the custom script that updates all relevant files:
+**Features**:
+- Checks code formatting with `cargo fmt --check`
+- Runs clippy lints with strict warnings (`-D warnings`)
+- Executes all unit and integration tests
+- Builds release version to ensure compilation
 
+**Usage**:
 ```bash
-./scripts/update-version.sh 0.1.2
+# Run all checks (same as CI pipeline)
+./scripts/run-tests.sh
 ```
 
-**What it does:**
-- ✅ Updates `Cargo.toml` 
-- ✅ Updates `Cargo.lock` (via `cargo check`)
-- ✅ Updates `ui/package.json`
-- ✅ Updates mock version in `ui/src/App.tsx`
-- ✅ Updates documentation
-- ✅ Validates semantic versioning format
-- ✅ Provides confirmation prompt
-- ✅ Shows verification of changes
+**What it does**:
+1. ✅ Code formatting check
+2. 🔧 Clippy linting 
+3. 🧪 Test execution
+4. 📦 Release build verification
 
-### Option 2: Using cargo-edit (Alternative)
+### 📦 `update-version.sh`
+**Purpose**: Automated version management for releases across all project files.
 
-Install cargo-edit for standard Rust version management:
+**Features**:
+- Updates version in `Cargo.toml` and `Cargo.lock`
+- Updates UI version in `ui/package.json` and `ui/src/App.tsx`
+- Updates documentation references
+- Validates semantic versioning format
+- Provides colored output and verification
 
+**Usage**:
 ```bash
-# Install cargo-edit
-cargo install cargo-edit
+# Update to a specific version
+./scripts/update-version.sh 0.2.0
 
-# Update version (only updates Cargo.toml and Cargo.lock)
-cargo set-version 0.1.2
-
-# Then manually update other files
+# The script will update:
+# - Cargo.toml (main version)
+# - Cargo.lock (via cargo check)
+# - ui/package.json (UI package version)
+# - ui/src/App.tsx (mock data version)
+# - .cursor/rules/rules.mdc (documentation)
 ```
 
-### Option 3: Manual Updates
+**Version Format**: Follows [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH)
 
-If you prefer manual control, update these files in order:
+**Example Output**:
+```
+[INFO] Current version: 0.1.7
+[INFO] New version: 0.2.0
+[INFO] Starting version update process...
+[SUCCESS] Updated Cargo.toml
+[SUCCESS] Updated Cargo.lock
+[SUCCESS] Updated ui/package.json
+[SUCCESS] Updated ui/src/App.tsx
+[SUCCESS] Version successfully updated to 0.2.0!
+```
 
-1. **Cargo.toml** - Main version
-2. **ui/package.json** - UI package version  
-3. **ui/src/App.tsx** - Mock data version
-4. **.cursor/rules/rules.mdc** - Documentation
-5. Run `cargo check` to update Cargo.lock
+## Development Workflow
 
-## Files That Contain Version Information
+### Local Development
+```bash
+# Before committing - run all checks
+./scripts/run-tests.sh
 
-| File | Purpose | Auto-updated? |
-|------|---------|---------------|
-| `Cargo.toml` | Main Rust package version | ✅ Script |
-| `Cargo.lock` | Dependency lock file | ✅ Script (via cargo) |
-| `ui/package.json` | UI package version | ✅ Script |
-| `ui/src/App.tsx` | Mock data in UI | ✅ Script |
-| `.cursor/rules/rules.mdc` | Documentation | ✅ Script |
-| `solsec-results` | Generated file | ✅ Cleaned by script |
+# When ready for release
+./scripts/update-version.sh 0.2.0
+```
 
-## Version Update Workflow
+### CI/CD Integration
+The `run-tests.sh` script is designed to match exactly what runs in GitHub Actions CI pipeline, ensuring local and CI environments are consistent.
 
-1. **Run the script:**
-   ```bash
-   ./scripts/update-version.sh 0.1.2
-   ```
+## Script Guidelines
 
-2. **Test the changes:**
-   ```bash
-   cargo build --release
-   cargo test
-   ```
+### Prerequisites
+- **Bash**: Scripts require Bash/sh
+- **Rust**: Latest stable Rust toolchain
+- **Git**: For version management
 
-3. **Commit and tag:**
-   ```bash
-   git add -A
-   git commit -m "chore: bump version to 0.1.2"
-   git tag v0.1.2
-   ```
+### Error Handling
+Both scripts use `set -e` to exit on first error, ensuring failures are caught immediately.
 
-4. **Push with tags:**
-   ```bash
-   git push origin main --tags
-   ```
+### Exit Codes
+- `0`: Success
+- `1`: Error (invalid arguments, validation failure, etc.)
 
-## Semantic Versioning Guidelines
+## Contributing
 
-Follow [Semantic Versioning](https://semver.org/):
+The existing scripts follow these patterns:
+- Clear colored output with status indicators
+- Proper error handling with immediate exit on failure
+- Semantic versioning validation
+- Cross-platform compatibility (macOS/Linux)
 
-- **MAJOR** (1.0.0): Breaking changes
-- **MINOR** (0.1.0): New features, backward compatible  
-- **PATCH** (0.0.1): Bug fixes, backward compatible
-
-For this project in 0.x.x phase:
-- **0.X.0**: New features or significant changes
-- **0.x.X**: Bug fixes and minor improvements
-
-## CI/CD Integration
-
-The version is automatically used in:
-- GitHub Actions workflows
-- Release artifacts naming  
-- Security report metadata
-- Plugin information
+When modifying scripts:
+1. Test on both macOS and Linux
+2. Ensure proper error handling
+3. Add appropriate logging/output
+4. Update this documentation
 
 ## Troubleshooting
 
-**Script fails on macOS:**
-- The script uses `sed -i.bak` for macOS compatibility
-- Backup files (.bak) are automatically cleaned up
+**Permission Denied**: Make scripts executable with `chmod +x scripts/*.sh`
 
-**Permission denied:**
-```bash
-chmod +x scripts/update-version.sh
-```
+**Version Update Fails**: Ensure you're using valid semantic versioning (e.g., 0.2.0, not 0.2)
 
-**Invalid version format:**
-- Must follow semantic versioning: `MAJOR.MINOR.PATCH`
-- Example: `0.1.2`, `1.0.0`, `2.1.3` 
+**Test Script Fails**: This indicates issues that would also fail in CI - fix the underlying code issues
+
+---
+
+For more information, see the main [README.md](../README.md) or [project documentation](../rules.md). 

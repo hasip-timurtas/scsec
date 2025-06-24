@@ -51,6 +51,8 @@ toml = "0.8"
 dirs = "6.0"
 # Cross-platform browser opening
 opener = "0.7"
+# Parallel processing
+rayon = "1.8"
 
 [dev-dependencies]
 tempfile = "3.8"

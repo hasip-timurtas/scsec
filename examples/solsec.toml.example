@@ -1,19 +1,36 @@
-# Example solsec configuration file
-# Copy this to solsec.toml and customize for your project
+# Solsec Configuration File
+# This file configures the Solana Smart Contract Security Toolkit
 
-# Global settings
-[global]
-# Scan timeout in seconds (0 = no timeout)
-timeout = 300
+[general]
+# Maximum file size to analyze (in bytes)
+max_file_size = 10485760  # 10MB
+# Timeout per file analysis (in seconds)
+timeout_per_file = 30
+# Number of parallel worker threads (0 = auto-detect)
+parallel_workers = 0
+# Minimum severity level to report
+severity_threshold = "low"  # low, medium, high, critical
 
-# Number of parallel workers for analysis
-workers = 4
+[scanning]
+# File patterns to include (glob patterns)
+include_patterns = ["**/*.rs"]
+# File patterns to exclude (glob patterns)
+exclude_patterns = ["**/target/**", "**/.git/**", "**/node_modules/**"]
+# Whether to follow symbolic links
+follow_symlinks = false
+# Maximum directory depth to scan
+max_depth = 50
 
-# Minimum severity level to report (low, medium, high, critical)
-min_severity = "medium"
+[output]
+# Include code suggestions in reports
+include_suggestions = true
+# Include code snippets in reports
+include_code_snippets = true
+# Maximum length of code snippets (characters)
+max_snippet_length = 200
+# Whether to colorize console output
+colorize_output = true
 
-# Rules configuration
-[rules]
 # Enable/disable specific rules
 enabled_rules = [
     "integer_overflow",
@@ -23,7 +40,7 @@ enabled_rules = [
 ]
 
 disabled_rules = [
-    # Add rules to disable here
+    # Add rule names here to disable them
     # "example_rule"
 ]
 
@@ -31,83 +48,128 @@ disabled_rules = [
 [rule_settings]
 
 [rule_settings.integer_overflow]
-# Ignore patterns for files/functions
-ignore_patterns = [
-    "test_*",
-    "mock_*",
-    "*_test.rs"
-]
-# Enable more aggressive checking
-strict_mode = false
+# Patterns to ignore when checking for integer overflow
+ignore_patterns = ["test_*", "mock_*", "bench_*"]
+# Whether to check for checked arithmetic usage
+check_for_checked_arithmetic = true
+# Severity level for this rule
+severity_override = "medium"
 
 [rule_settings.missing_signer_check]
 # Instructions that must have signer validation
-required_for_instructions = [
-    "transfer",
-    "withdraw",
-    "mint",
-    "burn"
-]
-# Allow certain patterns to bypass the check
-bypass_patterns = [
-    "initialize",
-    "create_account"
-]
+required_for_instructions = ["transfer", "withdraw", "mint", "burn"]
+# Keywords that indicate signer validation
+signer_validation_keywords = ["is_signer", "Signer", "verify_signer", "check_authority"]
+# Severity level for this rule
+severity_override = "high"
 
 [rule_settings.unchecked_account]
-# Accounts that are commonly safe to use unchecked
-safe_account_types = [
-    "SystemProgram",
-    "TokenProgram",
-    "AssociatedTokenProgram"
-]
+# Keywords that indicate dangerous account usage
+danger_keywords = ["unchecked", "unsafe", "raw_ptr"]
+# Account validation keywords
+validation_keywords = ["check", "validate", "verify", "assert"]
+# Severity level for this rule
+severity_override = "critical"
 
 [rule_settings.reentrancy]
-# Cross-program invocation patterns to check
-check_patterns = [
-    "invoke",
-    "invoke_signed",
-    "cpi"
+# External call patterns to detect
+external_call_patterns = ["invoke", "invoke_signed", "cpi", "cross_program"]
+# State change patterns to look for after external calls
+state_change_patterns = ["=", "+=", "-=", "*=", "/=", "push", "pop"]
+# Number of lines to check after external call
+lookahead_lines = 10
+# Severity level for this rule
+severity_override = "high"
+
+# Plugin settings
+[plugins]
+# Directory to load plugins from
+plugin_directory = "~/.config/solsec/plugins"
+# Whether to load plugins automatically
+auto_load_plugins = true
+# List of specific plugins to load
+load_plugins = [
+    # "custom_rule_plugin.so"
 ]
 
-# Output configuration
-[output]
-# Default output directory
-directory = "./solsec-results"
+# Fuzzing settings
+[fuzzing]
+# Default timeout for fuzzing (seconds)
+default_timeout = 300
+# Default number of fuzzing jobs
+default_jobs = 4
+# Maximum input size for fuzzing
+max_input_size = 1048576  # 1MB
+# Whether to generate coverage reports
+generate_coverage = true
+# Fuzzing engine options
+engine_options = {
+    mutation_depth = 5,
+    dictionary_enabled = true,
+    crash_reproduction = true
+}
 
-# Default report format (json, html, markdown, csv)
-format = "json"
+# Report generation settings
+[reporting]
+# Default output formats
+default_formats = ["json", "html"]
+# Whether to open HTML reports automatically
+auto_open_html = true
+# Template customization
+html_template_path = ""  # Path to custom HTML template
+markdown_template_path = ""  # Path to custom Markdown template
+# Whether to include metadata in reports
+include_metadata = true
+# Whether to include recommendations
+include_recommendations = true
 
-# Include source code snippets in reports
-include_snippets = true
+# CI/CD integration settings
+[ci_cd]
+# Exit codes for different scenarios
+exit_code_no_issues = 0
+exit_code_critical_found = 1
+exit_code_high_found = 2
+exit_code_error = 3
+# Whether to fail on critical issues
+fail_on_critical = true
+# Whether to fail on high severity issues
+fail_on_high = false
+# Format for CI/CD output (json recommended)
+ci_output_format = "json"
 
-# Maximum length of code snippets
-max_snippet_length = 200
+# Performance tuning
+[performance]
+# Cache analysis results
+enable_caching = true
+# Cache directory
+cache_directory = "~/.cache/solsec"
+# Cache expiration time (hours)
+cache_expiration_hours = 24
+# Memory limit for analysis (MB)
+memory_limit_mb = 1024
 
-# Fuzz testing configuration
-[fuzz]
-# Default timeout for fuzzing in seconds
-timeout = 300
+# Logging configuration
+[logging]
+# Log level: trace, debug, info, warn, error
+level = "info"
+# Log format: compact, pretty, json
+format = "compact"
+# Whether to log to file
+log_to_file = false
+# Log file path
+log_file_path = "solsec.log"
+# Maximum log file size (MB)
+max_log_file_size_mb = 10
 
-# Default number of parallel jobs
-jobs = 2
-
-# Corpus directory for fuzz inputs
-corpus_dir = "./fuzz/corpus"
-
-# Artifacts directory for crashes
-artifacts_dir = "./fuzz/artifacts"
-
-# Plugin configuration
-[plugins]
-# Directory to search for plugins
-plugin_dir = "~/.config/solsec/plugins"
-
-# Auto-load plugins from plugin directory
-auto_load = true
-
-# Specific plugins to load
-load = [
-    # "custom_rule.so",
-    # "advanced_checks.dll"
-] 
+# Advanced analysis settings
+[analysis]
+# Enable semantic analysis (AST-based)
+enable_semantic_analysis = false
+# Enable control flow analysis
+enable_control_flow_analysis = false
+# Enable data flow analysis
+enable_data_flow_analysis = false
+# Maximum function complexity to analyze
+max_function_complexity = 100
+# Whether to analyze dependencies
+analyze_dependencies = false 
