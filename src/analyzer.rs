@@ -92,6 +92,18 @@ impl StaticAnalyzer {
         self.rules.push(Box::new(MissingSignerCheckRule::new()));
         self.rules.push(Box::new(UncheckedAccountRule::new()));
         self.rules.push(Box::new(ReentrancyRule::new()));
+
+        // Add critical missing security rules
+        self.rules.push(Box::new(PdaValidationRule::new()));
+        self.rules.push(Box::new(PrivilegeEscalationRule::new()));
+        self.rules.push(Box::new(UnsafeArithmeticRule::new()));
+        self.rules.push(Box::new(InsufficientValidationRule::new()));
+
+        // Add Solana-specific critical security rules
+        self.rules.push(Box::new(AccountOwnershipRule::new()));
+        self.rules.push(Box::new(LamportManipulationRule::new()));
+        self.rules.push(Box::new(ProgramIdValidationRule::new()));
+
         Ok(())
     }
 
@@ -265,6 +277,18 @@ impl Rule for IntegerOverflowRule {
         let arithmetic_regex = Regex::new(r"\b\w+\s*[+\-*]\s*\w+")?;
 
         for (line_num, line) in lines.iter().enumerate() {
+            let trimmed = line.trim();
+
+            // Skip comments and non-code lines
+            if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("*") {
+                continue;
+            }
+
+            // Skip string literals and documentation
+            if trimmed.starts_with("\"") || trimmed.starts_with("msg!") {
+                continue;
+            }
+
             // Look for arithmetic operations without checked variants
             if line.contains('+') || line.contains('-') || line.contains('*') {
                 // Skip if already using checked operations - check using our patterns
@@ -276,16 +300,19 @@ impl Rule for IntegerOverflowRule {
                     continue;
                 }
 
-                // Look for potential integer operations
+                // Look for actual arithmetic operations (not just any + - *)
                 if arithmetic_regex.is_match(line) {
-                    results.push(RuleResult {
-                        severity: Severity::Medium,
-                        message: "Potential integer overflow. Consider using checked arithmetic operations.".to_string(),
-                        line_number: Some(line_num + 1),
-                        column: None,
-                        code_snippet: Some(line.trim().to_string()),
-                        suggestion: Some("Use checked_add(), checked_sub(), or checked_mul()".to_string()),
-                    });
+                    // Additional validation: ensure it's not a pointer operation or other non-arithmetic
+                    if !line.contains("as *") && !line.contains("ptr") {
+                        results.push(RuleResult {
+                            severity: Severity::Medium,
+                            message: "Potential integer overflow. Consider using checked arithmetic operations.".to_string(),
+                            line_number: Some(line_num + 1),
+                            column: None,
+                            code_snippet: Some(line.trim().to_string()),
+                            suggestion: Some("Use checked_add(), checked_sub(), or checked_mul()".to_string()),
+                        });
+                    }
                 }
             }
         }
@@ -370,18 +397,70 @@ impl Rule for UncheckedAccountRule {
         let lines: Vec<&str> = content.lines().collect();
 
         for (line_num, line) in lines.iter().enumerate() {
-            if line.contains("AccountInfo") && !line.contains("check") {
-                // Look for account usage without proper validation
-                if line.contains("unchecked") || line.contains("unsafe") {
-                    results.push(RuleResult {
-                        severity: Severity::Critical,
-                        message: "Account used without proper validation checks".to_string(),
-                        line_number: Some(line_num + 1),
-                        column: None,
-                        code_snippet: Some(line.trim().to_string()),
-                        suggestion: Some("Add proper account validation before usage".to_string()),
-                    });
-                }
+            let trimmed = line.trim();
+
+            // Skip comments
+            if trimmed.starts_with("//") || trimmed.starts_with("///") {
+                continue;
+            }
+
+            // Check for dangerous patterns
+            let mut found_issue = false;
+            let mut issue_description = String::new();
+            let mut severity = Severity::High;
+
+            // 1. Unsafe transmute with AccountInfo
+            if line.contains("mem::transmute") && line.contains("AccountInfo") {
+                found_issue = true;
+                severity = Severity::Critical;
+                issue_description =
+                    "Dangerous unsafe transmute of AccountInfo without validation".to_string();
+            }
+            // 2. Unsafe pointer operations on account data
+            else if line.contains("unsafe")
+                && (line.contains("as_ptr") || line.contains("as_mut_ptr"))
+            {
+                found_issue = true;
+                severity = Severity::Critical;
+                issue_description =
+                    "Unsafe pointer operation on account data without validation".to_string();
+            }
+            // 3. AccountInfo with CHECK comment (indicates manual validation needed)
+            else if line.contains("/// CHECK:") && line.contains("dangerous") {
+                found_issue = true;
+                severity = Severity::High;
+                issue_description =
+                    "Account marked as dangerous requiring manual validation".to_string();
+            }
+            // 4. AccountInfo without proper type constraints
+            else if line.contains("AccountInfo<'info>") && !line.contains("Account<") {
+                found_issue = true;
+                severity = Severity::Medium;
+                issue_description =
+                    "AccountInfo used without type validation - consider using Account<T>"
+                        .to_string();
+            }
+            // 5. Direct data access without validation
+            else if line.contains("try_borrow_data")
+                && (line.contains("unsafe") || 
+                     // Check next few lines for unsafe operations
+                     lines.iter().skip(line_num + 1).take(3).any(|l| l.contains("unsafe")))
+            {
+                found_issue = true;
+                severity = Severity::Critical;
+                issue_description =
+                    "Direct account data access followed by unsafe operations".to_string();
+            }
+
+            if found_issue {
+                results.push(RuleResult {
+                    severity,
+                    message: issue_description,
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some("Add proper account validation and use typed Account<T> instead of AccountInfo".to_string()),
+                });
             }
         }
 
@@ -413,25 +492,462 @@ impl Rule for ReentrancyRule {
 
         for (line_num, line) in lines.iter().enumerate() {
             // Look for cross-program invocations
-            if line.contains("invoke") || line.contains("invoke_signed") {
+            if line.contains("invoke(") || line.contains("invoke_signed(") {
                 // Check if state changes happen after the invoke
-                for check_line in lines.iter().skip(line_num + 1).take(5) {
-                    if check_line.contains("=") && !check_line.contains("let") {
-                        results.push(RuleResult {
-                            severity: Severity::High,
-                            message: "Potential reentrancy: state changes after external call"
-                                .to_string(),
-                            line_number: Some(line_num + 1),
-                            column: None,
-                            code_snippet: Some(line.trim().to_string()),
-                            suggestion: Some(
-                                "Move state changes before external calls or use reentrancy guards"
-                                    .to_string(),
-                            ),
-                        });
+                let mut found_state_change = false;
+                let mut state_change_line = 0;
+
+                for (offset, check_line) in lines.iter().skip(line_num + 1).take(10).enumerate() {
+                    let trimmed = check_line.trim();
+
+                    // Skip comments and empty lines
+                    if trimmed.starts_with("//") || trimmed.is_empty() {
+                        continue;
+                    }
+
+                    // Look for state modifications after invoke
+                    if (trimmed.contains("=")
+                        && !trimmed.contains("let")
+                        && !trimmed.contains("=="))
+                        || trimmed.contains("+=")
+                        || trimmed.contains("-=")
+                        || trimmed.contains("*=")
+                        || trimmed.contains("/=")
+                    {
+                        found_state_change = true;
+                        state_change_line = line_num + 1 + offset;
                         break;
                     }
                 }
+
+                if found_state_change {
+                    results.push(RuleResult {
+                        severity: Severity::High,
+                        message: format!(
+                            "Potential reentrancy: state changes at line {} after external call", 
+                            state_change_line + 1
+                        ),
+                        line_number: Some(line_num + 1),
+                        column: None,
+                        code_snippet: Some(line.trim().to_string()),
+                        suggestion: Some(
+                            "Move state changes before external calls or use reentrancy guards (CEI pattern)"
+                                .to_string(),
+                        ),
+                    });
+                }
+            }
+        }
+
+        Ok(results)
+    }
+}
+
+#[derive(Debug)]
+pub struct PdaValidationRule;
+
+impl PdaValidationRule {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Rule for PdaValidationRule {
+    fn name(&self) -> &str {
+        "pda_validation"
+    }
+
+    fn description(&self) -> &str {
+        "Detects missing or insufficient PDA validation"
+    }
+
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
+        let mut results = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+
+        for (line_num, line) in lines.iter().enumerate() {
+            // Look for PDA seeds usage without proper validation
+            if line.contains("seeds =") && !line.contains("bump") {
+                results.push(RuleResult {
+                    severity: Severity::High,
+                    message: "PDA seeds defined without bump validation".to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some("Add bump parameter to ensure canonical PDA".to_string()),
+                });
+            }
+
+            // Look for manual PDA derivation without validation
+            if line.contains("Pubkey::find_program_address") {
+                // Check if the result is validated
+                let mut has_validation = false;
+                for check_line in lines.iter().skip(line_num + 1).take(5) {
+                    if check_line.contains("require!") || check_line.contains("assert") {
+                        has_validation = true;
+                        break;
+                    }
+                }
+
+                if !has_validation {
+                    results.push(RuleResult {
+                        severity: Severity::Medium,
+                        message: "PDA derivation without subsequent validation".to_string(),
+                        line_number: Some(line_num + 1),
+                        column: None,
+                        code_snippet: Some(line.trim().to_string()),
+                        suggestion: Some(
+                            "Validate the derived PDA matches expected address".to_string(),
+                        ),
+                    });
+                }
+            }
+        }
+
+        Ok(results)
+    }
+}
+
+#[derive(Debug)]
+pub struct PrivilegeEscalationRule;
+
+impl PrivilegeEscalationRule {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Rule for PrivilegeEscalationRule {
+    fn name(&self) -> &str {
+        "privilege_escalation"
+    }
+
+    fn description(&self) -> &str {
+        "Detects potential privilege escalation vulnerabilities"
+    }
+
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
+        let mut results = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+
+        for (line_num, line) in lines.iter().enumerate() {
+            // Look for admin/authority changes without proper validation
+            if (line.contains("admin") || line.contains("authority"))
+                && (line.contains("=") && !line.contains("==") && !line.contains("let"))
+            {
+                // Check if there's proper authorization
+                let mut has_auth_check = false;
+                for check_line in lines.iter().skip(line_num.saturating_sub(5)).take(10) {
+                    if check_line.contains("is_signer")
+                        || check_line.contains("require!")
+                        || check_line.contains("assert")
+                    {
+                        has_auth_check = true;
+                        break;
+                    }
+                }
+
+                if !has_auth_check {
+                    results.push(RuleResult {
+                        severity: Severity::Critical,
+                        message: "Authority/admin change without proper authorization check"
+                            .to_string(),
+                        line_number: Some(line_num + 1),
+                        column: None,
+                        code_snippet: Some(line.trim().to_string()),
+                        suggestion: Some(
+                            "Add proper signer validation before changing privileges".to_string(),
+                        ),
+                    });
+                }
+            }
+
+            // Look for dangerous owner assignments
+            if line.contains("owner") && line.contains("=") && !line.contains("==") {
+                results.push(RuleResult {
+                    severity: Severity::High,
+                    message:
+                        "Account owner change detected - verify this is intentional and authorized"
+                            .to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some(
+                        "Ensure only authorized programs can change account ownership".to_string(),
+                    ),
+                });
+            }
+        }
+
+        Ok(results)
+    }
+}
+
+#[derive(Debug)]
+pub struct UnsafeArithmeticRule;
+
+impl UnsafeArithmeticRule {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Rule for UnsafeArithmeticRule {
+    fn name(&self) -> &str {
+        "unsafe_arithmetic"
+    }
+
+    fn description(&self) -> &str {
+        "Detects unsafe arithmetic operations that could cause panics or unexpected behavior"
+    }
+
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
+        let mut results = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+
+        for (line_num, line) in lines.iter().enumerate() {
+            // Division operations without zero checks
+            if line.contains('/')
+                && !line.contains("//")
+                && !line.contains("checked_div")
+                && !lines
+                    .iter()
+                    .skip(line_num.saturating_sub(3))
+                    .take(6)
+                    .any(|l| l.contains("require!") && l.contains("!= 0"))
+            {
+                results.push(RuleResult {
+                    severity: Severity::Medium,
+                    message: "Division operation without zero check - could panic".to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some("Use checked_div() or add explicit zero check".to_string()),
+                });
+            }
+
+            // Unchecked subtraction that could underflow
+            if (line.contains('-') || line.contains("-="))
+                && !line.contains("checked_sub")
+                && !line.contains("//")
+                && !line.contains("->")
+            {
+                results.push(RuleResult {
+                    severity: Severity::Medium,
+                    message: "Subtraction without underflow protection".to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some(
+                        "Use checked_sub() or saturating_sub() to prevent underflow".to_string(),
+                    ),
+                });
+            }
+        }
+
+        Ok(results)
+    }
+}
+
+#[derive(Debug)]
+pub struct InsufficientValidationRule;
+
+impl InsufficientValidationRule {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Rule for InsufficientValidationRule {
+    fn name(&self) -> &str {
+        "insufficient_validation"
+    }
+
+    fn description(&self) -> &str {
+        "Detects insufficient input and account validation"
+    }
+
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
+        let mut results = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+
+        for (line_num, line) in lines.iter().enumerate() {
+            // Public functions without input validation
+            if line.contains("pub fn")
+                && (line.contains("u64") || line.contains("u32") || line.contains("i64"))
+            {
+                let mut has_validation = false;
+                for check_line in lines.iter().skip(line_num + 1).take(10) {
+                    if check_line.contains("require!")
+                        || check_line.contains("assert")
+                        || check_line.contains(">=")
+                        || check_line.contains("<=")
+                    {
+                        has_validation = true;
+                        break;
+                    }
+                }
+
+                if !has_validation {
+                    results.push(RuleResult {
+                        severity: Severity::Medium,
+                        message: "Public function with numeric parameters lacks input validation"
+                            .to_string(),
+                        line_number: Some(line_num + 1),
+                        column: None,
+                        code_snippet: Some(line.trim().to_string()),
+                        suggestion: Some(
+                            "Add input validation with require! or assert! macros".to_string(),
+                        ),
+                    });
+                }
+            }
+
+            // Account constraints that are too permissive
+            if line.contains("/// CHECK:") && !line.contains("validate") {
+                results.push(RuleResult {
+                    severity: Severity::High,
+                    message: "Account marked for manual validation but no validation logic found"
+                        .to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some(
+                        "Implement proper account validation or use typed Account<T>".to_string(),
+                    ),
+                });
+            }
+        }
+
+        Ok(results)
+    }
+}
+
+#[derive(Debug)]
+pub struct AccountOwnershipRule;
+
+impl AccountOwnershipRule {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Rule for AccountOwnershipRule {
+    fn name(&self) -> &str {
+        "account_ownership"
+    }
+
+    fn description(&self) -> &str {
+        "Detects potential account ownership issues"
+    }
+
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
+        let mut results = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+
+        for (line_num, line) in lines.iter().enumerate() {
+            // Look for account ownership changes without proper validation
+            if line.contains("owner") && line.contains("=") && !line.contains("==") {
+                results.push(RuleResult {
+                    severity: Severity::High,
+                    message:
+                        "Account owner change detected - verify this is intentional and authorized"
+                            .to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some(
+                        "Ensure only authorized programs can change account ownership".to_string(),
+                    ),
+                });
+            }
+        }
+
+        Ok(results)
+    }
+}
+
+#[derive(Debug)]
+pub struct LamportManipulationRule;
+
+impl LamportManipulationRule {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Rule for LamportManipulationRule {
+    fn name(&self) -> &str {
+        "lamport_manipulation"
+    }
+
+    fn description(&self) -> &str {
+        "Detects potential lamport manipulation vulnerabilities"
+    }
+
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
+        let mut results = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+
+        for (line_num, line) in lines.iter().enumerate() {
+            // Look for lamport manipulation patterns
+            if line.contains("lamport::") && line.contains("=") && !line.contains("let") {
+                results.push(RuleResult {
+                    severity: Severity::High,
+                    message:
+                        "Lamport manipulation detected - verify this is intentional and authorized"
+                            .to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some(
+                        "Ensure only authorized programs can manipulate lamports".to_string(),
+                    ),
+                });
+            }
+        }
+
+        Ok(results)
+    }
+}
+
+#[derive(Debug)]
+pub struct ProgramIdValidationRule;
+
+impl ProgramIdValidationRule {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Rule for ProgramIdValidationRule {
+    fn name(&self) -> &str {
+        "program_id_validation"
+    }
+
+    fn description(&self) -> &str {
+        "Detects potential program ID validation issues"
+    }
+
+    fn check(&self, content: &str, _file_path: &Path) -> Result<Vec<RuleResult>> {
+        let mut results = Vec::new();
+        let lines: Vec<&str> = content.lines().collect();
+
+        for (line_num, line) in lines.iter().enumerate() {
+            // Look for program ID validation patterns
+            if line.contains("program_id") && line.contains("=") && !line.contains("let") {
+                results.push(RuleResult {
+                    severity: Severity::High,
+                    message:
+                        "Program ID validation detected - verify this is intentional and authorized"
+                            .to_string(),
+                    line_number: Some(line_num + 1),
+                    column: None,
+                    code_snippet: Some(line.trim().to_string()),
+                    suggestion: Some(
+                        "Ensure only authorized programs can access program ID".to_string(),
+                    ),
+                });
             }
         }
 
