@@ -564,4 +564,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⚠️ Important**: This tool helps identify potential security issues but does not guarantee complete security. Always conduct thorough testing and consider professional security audits for production applications.
 
+## 📸 Example HTML Report
+
+![HTML Security Report Example](/examples/result.png)
+
+*Professional HTML security reports with syntax highlighting, interactive navigation, and actionable suggestions*
+
 *Built with ❤️ by Hasip Timurtas*
