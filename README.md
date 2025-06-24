@@ -13,6 +13,7 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 - [Why solsec?](#-why-solsec)
 - [Features](#-features)
 - [Built-in Security Rules](#-built-in-security-rules)
+- [Security Checks Reference](SECURITY_CHECKS.md)
 - [Quick Start](#-quick-start)
 - [Commands](#-commands)
 - [Configuration](#-configuration)
@@ -224,6 +225,8 @@ required_for_instructions = ["transfer", "withdraw"]
 - ✅ **Unchecked Account**: Identifies 4 critical + 14 medium severity issues
 - ✅ **Zero False Positives**: Filters out comments, strings, and non-code patterns
 - ✅ **Comprehensive Coverage**: 39 total security issues identified across all severity levels
+
+> 📖 **For detailed information about each security check, including code examples and best practices, see the [Security Checks Reference](SECURITY_CHECKS.md).**
 
 ## 🔌 Plugin Development
 
