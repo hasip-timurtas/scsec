@@ -4,8 +4,34 @@
 [![Downloads](https://img.shields.io/crates/d/solsec.svg)](https://crates.io/crates/solsec)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust](https://img.shields.io/badge/rust-2021-orange.svg)](https://www.rust-lang.org)
+[![CI](https://github.com/hasip-timurtas/solsec/actions/workflows/ci.yml/badge.svg)](https://github.com/hasip-timurtas/solsec/actions/workflows/ci.yml)
 
 A comprehensive security analysis tool for Solana smart contracts that helps developers identify vulnerabilities before deployment through static analysis and fuzz testing.
+
+## Table of Contents
+
+- [Why solsec?](#-why-solsec)
+- [Features](#-features)
+- [Built-in Security Rules](#-built-in-security-rules)
+- [Quick Start](#-quick-start)
+- [Commands](#-commands)
+- [Configuration](#-configuration)
+- [Plugin Development](#-plugin-development)
+- [CI/CD Integration](#-cicd-integration)
+- [Report Examples](#-report-examples)
+- [Development](#️-development)
+- [Examples](#-examples)
+- [Community](#-community)
+- [License](#-license)
+
+## Why solsec?
+
+**solsec** is designed to be a developer's first line of defense. While other tools exist, solsec offers a unique combination of:
+
+- **Ease of Use**: Get started in minutes with sensible defaults and clear, actionable output.
+- **Speed**: Built in Rust for high-performance analysis that won't slow down your workflow.
+- **Integration**: Designed for seamless CI/CD and pre-commit hook integration.
+- **Comprehensiveness**: Combines static analysis, fuzz testing, and a plugin system in one toolkit.
 
 ## ✨ Features
 
@@ -22,7 +48,7 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 
 ### Installation
 
-#### From Crates.io (Recommended)
+#### From Crates.io
 ```bash
 cargo install solsec
 ```
@@ -118,8 +144,6 @@ EXAMPLES:
     solsec fuzz ./programs/my-program --timeout 600 --jobs 4
     solsec fuzz ./programs --output ./custom-fuzz-results
 ```
-
-
 
 ### `solsec plugin`
 
@@ -261,8 +285,7 @@ jobs:
     
     - name: Install solsec
       run: |
-        curl -L https://github.com/hasip-timurtas/solsec/releases/latest/download/solsec-linux-x86_64.tar.gz | tar xz
-        sudo mv solsec /usr/local/bin/
+        cargo install --locked solsec
     
     - name: Run security scan
       run: |
@@ -277,6 +300,8 @@ jobs:
     - name: Fail on critical issues
       run: |
         if [ -f ./security-results/*.json ]; then
+          # Ensure jq is installed
+          sudo apt-get install -y jq
           critical_count=$(jq '[.[] | select(.severity == "critical")] | length' ./security-results/*.json)
           if [ "$critical_count" -gt 0 ]; then
             echo "❌ Critical security issues found!"
@@ -287,24 +312,46 @@ jobs:
 
 ### Pre-commit Hook
 
+Block commits that introduce critical vulnerabilities.
+
+**Setup Instructions:**
+1.  Create the file: `.git/hooks/pre-commit`
+2.  Copy the script below into the file.
+3.  Make it executable: `chmod +x .git/hooks/pre-commit`
+
 ```bash
 #!/bin/sh
 # .git/hooks/pre-commit
 
 echo "🛡️ Running security scan..."
-solsec scan ./programs --format json --output ./tmp-security-results
+# Ensure solsec is in your PATH
+if ! command -v solsec &> /dev/null; then
+    echo "solsec could not be found, skipping pre-commit check."
+    exit 0
+fi
 
-if [ -f ./tmp-security-results/*.json ]; then
-    critical_count=$(jq '[.[] | select(.severity == "critical")] | length' ./tmp-security-results/*.json 2>/dev/null || echo "0")
+# Create a temporary directory for results
+RESULTS_DIR=$(mktemp -d)
+solsec scan ./programs --format json --output "$RESULTS_DIR" --no-open
+
+if [ -f "$RESULTS_DIR"/*.json ]; then
+    # Ensure jq is installed
+    if ! command -v jq &> /dev/null; then
+        echo "jq could not be found, skipping severity check."
+        rm -rf "$RESULTS_DIR"
+        exit 0
+    fi
+
+    critical_count=$(jq '[.[] | select(.severity == "critical")] | length' "$RESULTS_DIR"/*.json 2>/dev/null || echo "0")
     if [ "$critical_count" -gt 0 ]; then
         echo "❌ Critical security issues found! Commit blocked."
         echo "Run 'solsec scan ./programs' to see details."
-        rm -rf ./tmp-security-results
+        rm -rf "$RESULTS_DIR"
         exit 1
     fi
 fi
 
-rm -rf ./tmp-security-results
+rm -rf "$RESULTS_DIR"
 echo "✅ Security scan passed!"
 ```
 
