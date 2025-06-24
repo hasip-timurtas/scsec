@@ -77,6 +77,26 @@ impl ReportGenerator {
             panic!("Failed to register Markdown template: {}", e);
         }
 
+        // Register the 'eq' helper for string comparisons
+        handlebars.register_helper(
+            "eq",
+            Box::new(
+                |h: &handlebars::Helper,
+                 _: &handlebars::Handlebars,
+                 _: &handlebars::Context,
+                 _: &mut handlebars::RenderContext,
+                 out: &mut dyn handlebars::Output|
+                 -> handlebars::HelperResult {
+                    let param1 = h.param(0).and_then(|v| v.value().as_str()).unwrap_or("");
+                    let param2 = h.param(1).and_then(|v| v.value().as_str()).unwrap_or("");
+                    if param1 == param2 {
+                        out.write("true")?;
+                    }
+                    Ok(())
+                },
+            ),
+        );
+
         Self { handlebars }
     }
 
@@ -266,8 +286,23 @@ impl ReportGenerator {
     }
 
     fn generate_html_report(&self, report: &SecurityReport) -> Result<String> {
+        // Create a copy of the report with sorted analysis results
+        let mut sorted_report = report.clone();
+
+        // Sort by severity: Critical > High > Medium > Low
+        sorted_report.analysis_results.sort_by(|a, b| {
+            let severity_order = |s: &str| match s {
+                "critical" => 0,
+                "high" => 1,
+                "medium" => 2,
+                "low" => 3,
+                _ => 4,
+            };
+            severity_order(&a.severity).cmp(&severity_order(&b.severity))
+        });
+
         self.handlebars
-            .render("html_report", report)
+            .render("html_report", &sorted_report)
             .with_context(|| "Failed to render HTML report")
     }
 
@@ -314,7 +349,23 @@ const HTML_TEMPLATE: &str = r#"
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }
         .content { padding: 30px; }
         .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-card { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            border: 2px solid transparent;
+        }
+        .stat-card:hover { 
+            background: #e9ecef; 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+        }
+        .stat-card.clickable:hover { 
+            border-color: #007bff; 
+        }
         .stat-number { font-size: 2em; font-weight: bold; margin-bottom: 5px; }
         .critical { color: #dc3545; }
         .high { color: #fd7e14; }
@@ -327,6 +378,63 @@ const HTML_TEMPLATE: &str = r#"
         .issue.low { border-left-color: #28a745; }
         .code { background: #f1f3f4; padding: 10px; border-radius: 4px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; margin: 10px 0; }
         .recommendations { background: #e3f2fd; padding: 20px; border-radius: 8px; margin-top: 30px; }
+        
+        /* Severity Section Styles */
+        .severity-section { 
+            margin: 30px 0; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background: #fafbfc; 
+            border: 1px solid #e9ecef; 
+        }
+        .severity-header { 
+            font-size: 1.4em; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+            padding: 15px; 
+            border-radius: 6px; 
+            background: #ffffff; 
+            border-left: 4px solid; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .severity-header.critical { 
+            border-left-color: #dc3545; 
+            background: linear-gradient(90deg, #fff5f5 0%, #ffffff 100%); 
+        }
+        .severity-header.high { 
+            border-left-color: #fd7e14; 
+            background: linear-gradient(90deg, #fff7ed 0%, #ffffff 100%); 
+        }
+        .severity-header.medium { 
+            border-left-color: #ffc107; 
+            background: linear-gradient(90deg, #fffbf0 0%, #ffffff 100%); 
+        }
+        .severity-header.low { 
+            border-left-color: #28a745; 
+            background: linear-gradient(90deg, #f0fff4 0%, #ffffff 100%); 
+        }
+        .severity-badge { 
+            display: inline-block; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 0.85em; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            color: white; 
+        }
+        .severity-badge.critical { 
+            background: #dc3545; 
+        }
+        .severity-badge.high { 
+            background: #fd7e14; 
+        }
+        .severity-badge.medium { 
+            background: #ffc107; 
+            color: #212529; 
+        }
+        .severity-badge.low { 
+            background: #28a745; 
+        }
         
         /* Enhanced Suggestion Styling */
         .suggestion-container { 
@@ -436,52 +544,154 @@ const HTML_TEMPLATE: &str = r#"
         
         <div class="content">
             <div class="summary">
-                <div class="stat-card">
+                <div class="stat-card" onclick="scrollToSection('all-issues')">
                     <div class="stat-number">{{summary.total_issues}}</div>
                     <div>Total Issues</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="scrollToSection('critical-issues')" {{#unless summary.critical_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number critical">{{summary.critical_issues}}</div>
                     <div>Critical</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="scrollToSection('high-issues')" {{#unless summary.high_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number high">{{summary.high_issues}}</div>
                     <div>High</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="scrollToSection('medium-issues')" {{#unless summary.medium_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number medium">{{summary.medium_issues}}</div>
                     <div>Medium</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="scrollToSection('low-issues')" {{#unless summary.low_issues}}style="opacity: 0.5; cursor: default;"{{/unless}}>
                     <div class="stat-number low">{{summary.low_issues}}</div>
                     <div>Low</div>
                 </div>
             </div>
 
             {{#if analysis_results}}
-            <h2>Security Issues</h2>
-            {{#each analysis_results}}
-            <div class="issue {{severity}}">
-                <h3>{{rule_name}}</h3>
-                <p><strong>File:</strong> {{file_path}} {{#if line_number}}(Line {{line_number}}){{/if}}</p>
-                <p><strong>Severity:</strong> {{severity}}</p>
-                <p>{{message}}</p>
-                {{#if code_snippet}}
-                <div class="code">{{code_snippet}}</div>
-                {{/if}}
-                {{#if suggestion}}
-                <div class="suggestion-container">
-                    <div class="suggestion-header">
-                        <span class="suggestion-icon">💡</span>
-                        <span>Suggested Fix</span>
+            <h2 id="all-issues">🔍 Security Issues</h2>
+            
+            <!-- Critical Issues Section -->
+            {{#if summary.critical_issues}}
+            <div id="critical-issues" class="severity-section">
+                <h3 class="severity-header critical">🚨 Critical Issues ({{summary.critical_issues}})</h3>
+                {{#each analysis_results}}
+                {{#if (eq severity "critical")}}
+                <div class="issue {{severity}}">
+                    <h4>{{rule_name}}</h4>
+                    <p><strong>File:</strong> {{file_path}} {{#if line_number}}(Line {{line_number}}){{/if}}</p>
+                    <p><strong>Severity:</strong> <span class="severity-badge critical">{{severity}}</span></p>
+                    <p>{{message}}</p>
+                    {{#if code_snippet}}
+                    <div class="code">{{code_snippet}}</div>
+                    {{/if}}
+                    {{#if suggestion}}
+                    <div class="suggestion-container">
+                        <div class="suggestion-header">
+                            <span class="suggestion-icon">💡</span>
+                            <span>Suggested Fix</span>
+                        </div>
+                        <div class="suggestion-content">
+                            <div id="suggestion-{{@index}}" class="suggestion-text">{{suggestion}}</div>
+                        </div>
                     </div>
-                    <div class="suggestion-content">
-                        <div id="suggestion-{{@index}}" class="suggestion-text">{{suggestion}}</div>
-                    </div>
+                    {{/if}}
                 </div>
                 {{/if}}
+                {{/each}}
             </div>
-            {{/each}}
+            {{/if}}
+            
+            <!-- High Issues Section -->
+            {{#if summary.high_issues}}
+            <div id="high-issues" class="severity-section">
+                <h3 class="severity-header high">⚠️ High Severity Issues ({{summary.high_issues}})</h3>
+                {{#each analysis_results}}
+                {{#if (eq severity "high")}}
+                <div class="issue {{severity}}">
+                    <h4>{{rule_name}}</h4>
+                    <p><strong>File:</strong> {{file_path}} {{#if line_number}}(Line {{line_number}}){{/if}}</p>
+                    <p><strong>Severity:</strong> <span class="severity-badge high">{{severity}}</span></p>
+                    <p>{{message}}</p>
+                    {{#if code_snippet}}
+                    <div class="code">{{code_snippet}}</div>
+                    {{/if}}
+                    {{#if suggestion}}
+                    <div class="suggestion-container">
+                        <div class="suggestion-header">
+                            <span class="suggestion-icon">💡</span>
+                            <span>Suggested Fix</span>
+                        </div>
+                        <div class="suggestion-content">
+                            <div id="suggestion-{{@index}}" class="suggestion-text">{{suggestion}}</div>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/if}}
+                {{/each}}
+            </div>
+            {{/if}}
+            
+            <!-- Medium Issues Section -->
+            {{#if summary.medium_issues}}
+            <div id="medium-issues" class="severity-section">
+                <h3 class="severity-header medium">🔶 Medium Severity Issues ({{summary.medium_issues}})</h3>
+                {{#each analysis_results}}
+                {{#if (eq severity "medium")}}
+                <div class="issue {{severity}}">
+                    <h4>{{rule_name}}</h4>
+                    <p><strong>File:</strong> {{file_path}} {{#if line_number}}(Line {{line_number}}){{/if}}</p>
+                    <p><strong>Severity:</strong> <span class="severity-badge medium">{{severity}}</span></p>
+                    <p>{{message}}</p>
+                    {{#if code_snippet}}
+                    <div class="code">{{code_snippet}}</div>
+                    {{/if}}
+                    {{#if suggestion}}
+                    <div class="suggestion-container">
+                        <div class="suggestion-header">
+                            <span class="suggestion-icon">💡</span>
+                            <span>Suggested Fix</span>
+                        </div>
+                        <div class="suggestion-content">
+                            <div id="suggestion-{{@index}}" class="suggestion-text">{{suggestion}}</div>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/if}}
+                {{/each}}
+            </div>
+            {{/if}}
+            
+            <!-- Low Issues Section -->
+            {{#if summary.low_issues}}
+            <div id="low-issues" class="severity-section">
+                <h3 class="severity-header low">🔵 Low Severity Issues ({{summary.low_issues}})</h3>
+                {{#each analysis_results}}
+                {{#if (eq severity "low")}}
+                <div class="issue {{severity}}">
+                    <h4>{{rule_name}}</h4>
+                    <p><strong>File:</strong> {{file_path}} {{#if line_number}}(Line {{line_number}}){{/if}}</p>
+                    <p><strong>Severity:</strong> <span class="severity-badge low">{{severity}}</span></p>
+                    <p>{{message}}</p>
+                    {{#if code_snippet}}
+                    <div class="code">{{code_snippet}}</div>
+                    {{/if}}
+                    {{#if suggestion}}
+                    <div class="suggestion-container">
+                        <div class="suggestion-header">
+                            <span class="suggestion-icon">💡</span>
+                            <span>Suggested Fix</span>
+                        </div>
+                        <div class="suggestion-content">
+                            <div id="suggestion-{{@index}}" class="suggestion-text">{{suggestion}}</div>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/if}}
+                {{/each}}
+            </div>
+            {{/if}}
             {{/if}}
 
             <div class="recommendations">
@@ -496,6 +706,23 @@ const HTML_TEMPLATE: &str = r#"
     </div>
     
     <script>
+        // Smooth scrolling function for navigation
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+                // Add a subtle highlight effect
+                element.style.boxShadow = '0 0 20px rgba(0,123,255,0.3)';
+                setTimeout(() => {
+                    element.style.boxShadow = '';
+                }, 2000);
+            }
+        }
+
         // Enhanced suggestion formatting
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.suggestion-text').forEach(function(element) {
