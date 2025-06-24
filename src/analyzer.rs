@@ -356,15 +356,28 @@ impl Rule for MissingSignerCheckRule {
                 }
 
                 if !has_signer_check {
+                    // Extract function name for specific suggestions
+                    let function_name = line
+                        .split("pub fn ")
+                        .nth(1)
+                        .and_then(|s| s.split('(').next())
+                        .unwrap_or("unknown");
+
+                    let suggestion = format!(
+                        "Add signer validation to function '{}':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,",
+                        function_name
+                    );
+
                     results.push(RuleResult {
                         severity: Severity::High,
-                        message: "Instruction handler may be missing signer validation".to_string(),
+                        message: format!(
+                            "Instruction handler '{}' may be missing signer validation",
+                            function_name
+                        ),
                         line_number: Some(line_num + 1),
                         column: None,
                         code_snippet: Some(line.trim().to_string()),
-                        suggestion: Some(
-                            "Add signer validation to prevent unauthorized access".to_string(),
-                        ),
+                        suggestion: Some(suggestion),
                     });
                 }
             }

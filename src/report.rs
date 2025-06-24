@@ -325,8 +325,106 @@ const HTML_TEMPLATE: &str = r#"
         .issue.high { border-left-color: #fd7e14; }
         .issue.medium { border-left-color: #ffc107; }
         .issue.low { border-left-color: #28a745; }
-        .code { background: #f1f3f4; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; }
+        .code { background: #f1f3f4; padding: 10px; border-radius: 4px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; margin: 10px 0; }
         .recommendations { background: #e3f2fd; padding: 20px; border-radius: 8px; margin-top: 30px; }
+        
+        /* Enhanced Suggestion Styling */
+        .suggestion-container { 
+            background: #f8f9fb; 
+            border: 1px solid #e9ecef; 
+            border-radius: 8px; 
+            padding: 16px; 
+            margin: 12px 0; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .suggestion-header { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 12px; 
+            font-weight: 600; 
+            color: #495057;
+        }
+        .suggestion-icon { 
+            margin-right: 8px; 
+            font-size: 1.2em; 
+        }
+        .suggestion-content { 
+            line-height: 1.6; 
+        }
+        .suggestion-option { 
+            background: #ffffff; 
+            border: 1px solid #dee2e6; 
+            border-radius: 6px; 
+            padding: 12px; 
+            margin: 8px 0; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .suggestion-option-title { 
+            font-weight: 600; 
+            color: #28a745; 
+            margin-bottom: 8px; 
+            display: flex;
+            align-items: center;
+        }
+        .option-number { 
+            background: #28a745; 
+            color: white; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 0.8em; 
+            margin-right: 8px; 
+        }
+        .before-after { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin: 12px 0; 
+        }
+        .before-after-item { 
+            background: #f8f9fa; 
+            border-radius: 4px; 
+            padding: 8px 12px; 
+        }
+        .before-after-label { 
+            font-size: 0.85em; 
+            font-weight: 600; 
+            margin-bottom: 4px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        .before-label { 
+            color: #dc3545; 
+        }
+        .after-label { 
+            color: #28a745; 
+        }
+        .code-example { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef; 
+            border-radius: 4px; 
+            padding: 8px 12px; 
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; 
+            font-size: 0.9em; 
+            color: #495057; 
+            overflow-x: auto;
+        }
+        .simple-suggestion { 
+            background: #e7f3ff; 
+            border-left: 4px solid #007bff; 
+            padding: 12px; 
+            border-radius: 4px; 
+            font-style: italic; 
+        }
+        
+        @media (max-width: 768px) { 
+            .before-after { 
+                grid-template-columns: 1fr; 
+            } 
+        }
     </style>
 </head>
 <body>
@@ -372,7 +470,15 @@ const HTML_TEMPLATE: &str = r#"
                 <div class="code">{{code_snippet}}</div>
                 {{/if}}
                 {{#if suggestion}}
-                <p><strong>Suggestion:</strong> {{suggestion}}</p>
+                <div class="suggestion-container">
+                    <div class="suggestion-header">
+                        <span class="suggestion-icon">💡</span>
+                        <span>Suggested Fix</span>
+                    </div>
+                    <div class="suggestion-content">
+                        <div id="suggestion-{{@index}}" class="suggestion-text">{{suggestion}}</div>
+                    </div>
+                </div>
                 {{/if}}
             </div>
             {{/each}}
@@ -388,6 +494,102 @@ const HTML_TEMPLATE: &str = r#"
             </div>
         </div>
     </div>
+    
+    <script>
+        // Enhanced suggestion formatting
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.suggestion-text').forEach(function(element) {
+                const text = element.textContent;
+                
+                // Check if it's a multi-option suggestion
+                if (text.includes('Option 1') || text.includes('Before:') || text.includes('After:')) {
+                    element.innerHTML = formatEnhancedSuggestion(text);
+                } else {
+                    // Simple suggestion
+                    element.innerHTML = '<div class="simple-suggestion">' + text + '</div>';
+                }
+            });
+        });
+        
+        function formatEnhancedSuggestion(text) {
+            let html = '';
+            
+            // Handle before/after patterns
+            if (text.includes('Before:') && text.includes('After:')) {
+                const lines = text.split('\n');
+                let beforeLine = '';
+                let afterLine = '';
+                
+                for (let line of lines) {
+                    if (line.trim().startsWith('Before:')) {
+                        beforeLine = line.replace('Before:', '').trim();
+                    } else if (line.trim().startsWith('After:')) {
+                        afterLine = line.replace('After:', '').trim();
+                    }
+                }
+                
+                if (beforeLine && afterLine) {
+                    html += '<div class="before-after">';
+                    html += '<div class="before-after-item">';
+                    html += '<div class="before-after-label before-label">Before</div>';
+                    html += '<div class="code-example">' + escapeHtml(beforeLine) + '</div>';
+                    html += '</div>';
+                    html += '<div class="before-after-item">';
+                    html += '<div class="before-after-label after-label">After</div>';
+                    html += '<div class="code-example">' + escapeHtml(afterLine) + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    return html;
+                }
+            }
+            
+            // Handle multi-option patterns
+            if (text.includes('Option 1') || text.includes('Option 2') || text.includes('Option 3')) {
+                const sections = text.split(/Option \d+/);
+                const header = sections[0].trim();
+                
+                if (header) {
+                    html += '<p>' + escapeHtml(header) + '</p>';
+                }
+                
+                let optionNumber = 1;
+                for (let i = 1; i < sections.length; i++) {
+                    const optionText = sections[i].trim();
+                    if (optionText) {
+                        const lines = optionText.split('\n');
+                        const title = lines[0].replace(/^[\s\-]+/, '').trim();
+                        const codeLines = lines.slice(1).filter(line => line.trim());
+                        
+                        html += '<div class="suggestion-option">';
+                        html += '<div class="suggestion-option-title">';
+                        html += '<span class="option-number">' + optionNumber + '</span>';
+                        html += escapeHtml(title);
+                        html += '</div>';
+                        
+                        if (codeLines.length > 0) {
+                            html += '<div class="code-example">';
+                            html += escapeHtml(codeLines.join('\n'));
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                        optionNumber++;
+                    }
+                }
+                
+                return html;
+            }
+            
+            // Fallback for other patterns
+            return '<div class="simple-suggestion">' + escapeHtml(text) + '</div>';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>
 "#;
