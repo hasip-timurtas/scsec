@@ -2,6 +2,25 @@
 
 This document provides a comprehensive overview of all security checks performed by **solsec**. Each check is designed to identify specific vulnerability patterns in Solana smart contracts.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [🔴 Critical Severity Checks](#-critical-severity-checks)
+  - [1. Unchecked Account Access](#1-unchecked-account-access-unchecked_account)
+  - [2. Privilege Escalation](#2-privilege-escalation-privilege_escalation)
+- [🟠 High Severity Checks](#-high-severity-checks)
+  - [3. Reentrancy Vulnerabilities](#3-reentrancy-vulnerabilities-reentrancy)
+  - [4. Missing Signer Validation](#4-missing-signer-validation-missing_signer_check)
+  - [5. PDA Validation Issues](#5-pda-validation-issues-pda_validation)
+  - [6. Insufficient Input Validation](#6-insufficient-input-validation-insufficient_validation)
+- [🟡 Medium Severity Checks](#-medium-severity-checks)
+  - [7. Integer Overflow](#7-integer-overflow-integer_overflow)
+  - [8. Unsafe Arithmetic Operations](#8-unsafe-arithmetic-operations-unsafe_arithmetic)
+- [🔵 Additional Security Validations](#-additional-security-validations)
+- [Detection Statistics](#detection-statistics)
+- [Best Practices Summary](#best-practices-summary)
+- [Integration with Development Workflow](#integration-with-development-workflow)
+
 ## Overview
 
 **solsec** performs **8 distinct security checks** across **4 severity levels**:
