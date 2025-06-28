@@ -364,15 +364,13 @@ impl Rule for MissingSignerCheckRule {
                         .unwrap_or("unknown");
 
                     let suggestion = format!(
-                        "Add signer validation to function '{}':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,",
-                        function_name
+                        "Add signer validation to function '{function_name}':\n\n  Option 1 - In account constraints:\n  #[account(signer)]\n  pub authority: Signer<'info>,\n\n  Option 2 - Runtime validation:\n  require!(ctx.accounts.authority.is_signer, \"Authority must sign\");\n\n  Option 3 - Using has_one constraint:\n  #[account(has_one = authority)]\n  pub target_account: Account<'info, MyAccount>,"
                     );
 
                     results.push(RuleResult {
                         severity: Severity::High,
                         message: format!(
-                            "Instruction handler '{}' may be missing signer validation",
-                            function_name
+                            "Instruction handler '{function_name}' may be missing signer validation"
                         ),
                         line_number: Some(line_num + 1),
                         column: None,
@@ -1025,15 +1023,14 @@ mod tests {
 
         // Create multiple Rust files
         for i in 0..5 {
-            let file_path = temp_dir.path().join(format!("test_{}.rs", i));
+            let file_path = temp_dir.path().join(format!("test_{i}.rs"));
             let code = format!(
                 r#"
-                pub fn function_{}(a: u64, b: u64) -> u64 {{
+                pub fn function_{i}(a: u64, b: u64) -> u64 {{
                     let result = a + b; // Potential overflow
                     result
                 }}
-                "#,
-                i
+                "#
             );
             write(&file_path, code).unwrap();
         }
@@ -1098,7 +1095,7 @@ mod tests {
 
         // Create many files to test parallel processing
         for i in 0..20 {
-            let file_path = temp_dir.path().join(format!("test_{}.rs", i));
+            let file_path = temp_dir.path().join(format!("test_{i}.rs"));
             let code = r#"
                 pub fn test_function(a: u64, b: u64) -> u64 {
                     let result = a + b;

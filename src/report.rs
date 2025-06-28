@@ -69,12 +69,12 @@ impl ReportGenerator {
 
         // Register HTML template
         if let Err(e) = handlebars.register_template_string("html_report", HTML_TEMPLATE) {
-            panic!("Failed to register HTML template: {}", e);
+            panic!("Failed to register HTML template: {e}");
         }
 
         // Register Markdown template
         if let Err(e) = handlebars.register_template_string("markdown_report", MARKDOWN_TEMPLATE) {
-            panic!("Failed to register Markdown template: {}", e);
+            panic!("Failed to register Markdown template: {e}");
         }
 
         // Register the 'eq' helper for string comparisons
@@ -197,13 +197,12 @@ impl ReportGenerator {
         let high_count = results.iter().filter(|r| r.severity == "high").count();
 
         if critical_count > 0 {
-            recommendations.push(format!("🚨 URGENT: {} critical security issues found. Address these immediately before deployment.", critical_count));
+            recommendations.push(format!("🚨 URGENT: {critical_count} critical security issues found. Address these immediately before deployment."));
         }
 
         if high_count > 0 {
             recommendations.push(format!(
-                "⚠️  {} high-severity issues require attention.",
-                high_count
+                "⚠️  {high_count} high-severity issues require attention."
             ));
         }
 
@@ -216,24 +215,21 @@ impl ReportGenerator {
         for (rule, count) in rule_counts {
             match rule.as_str() {
                 "integer_overflow" => {
-                    recommendations.push(format!("Consider using checked arithmetic operations for {} overflow-prone locations.", count));
+                    recommendations.push(format!("Consider using checked arithmetic operations for {count} overflow-prone locations."));
                 }
                 "missing_signer_check" => {
                     recommendations.push(format!(
-                        "Add signer validation to {} instruction handlers.",
-                        count
+                        "Add signer validation to {count} instruction handlers."
                     ));
                 }
                 "unchecked_account" => {
                     recommendations.push(format!(
-                        "Implement proper account validation for {} locations.",
-                        count
+                        "Implement proper account validation for {count} locations."
                     ));
                 }
                 "reentrancy" => {
                     recommendations.push(format!(
-                        "Review {} potential reentrancy vulnerabilities and implement guards.",
-                        count
+                        "Review {count} potential reentrancy vulnerabilities and implement guards."
                     ));
                 }
                 _ => {}

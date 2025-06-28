@@ -134,7 +134,7 @@ pub async fn handle_scan_command(config: ScanConfig) -> Result<()> {
             config.output.clone()
         } else {
             // Generate appropriate filename based on format
-            config.output.join(format!("security-report.{}", extension))
+            config.output.join(format!("security-report.{extension}"))
         };
 
         // Track HTML file path for opening later
@@ -150,10 +150,7 @@ pub async fn handle_scan_command(config: ScanConfig) -> Result<()> {
     let critical_count = results.iter().filter(|r| r.severity == "critical").count();
     let high_count = results.iter().filter(|r| r.severity == "high").count();
 
-    info!(
-        "Scan completed. Found {} critical and {} high severity issues",
-        critical_count, high_count
-    );
+    info!("Scan completed. Found {critical_count} critical and {high_count} high severity issues");
 
     if config.fail_on_critical && critical_count > 0 {
         error!("Critical issues found. Failing as requested.");

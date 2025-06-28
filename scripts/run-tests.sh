@@ -13,7 +13,7 @@ cargo fmt --all -- --check
 
 # 2. Run the linter
 echo "\n linting code with 'cargo clippy'..."
-cargo clippy --all-targets --all-features -- -D warnings
+cargo clippy --all-targets --all-features -- -D warnings -W clippy::uninlined-format-args
 
 # 3. Run unit and integration tests
 echo "\n🧪 Running tests with 'cargo test'..."

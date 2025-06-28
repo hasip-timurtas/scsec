@@ -182,9 +182,9 @@ impl PluginManager {
         };
 
         if self.plugins.remove(&plugin_name).is_some() {
-            info!("Unloaded plugin: {}", plugin_name);
+            info!("Unloaded plugin: {plugin_name}");
         } else {
-            warn!("Plugin not found: {}", plugin_name);
+            warn!("Plugin not found: {plugin_name}");
         }
 
         Ok(())

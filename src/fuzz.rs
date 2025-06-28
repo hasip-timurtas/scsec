@@ -195,10 +195,7 @@ impl FuzzEngine {
     }
 
     pub async fn run_fuzzing(&self, timeout_secs: u64, jobs: usize) -> Result<FuzzResult> {
-        info!(
-            "Starting fuzzing with {} jobs for {} seconds",
-            jobs, timeout_secs
-        );
+        info!("Starting fuzzing with {jobs} jobs for {timeout_secs} seconds");
 
         let mut all_crashes = Vec::new();
         let mut total_executions = 0u64;
@@ -311,7 +308,7 @@ impl FuzzEngine {
                 if let Some(name) = instruction.get("name").and_then(|n| n.as_str()) {
                     let entry_point = name.to_string();
                     let target = FuzzTarget {
-                        name: format!("fuzz_instruction_{}", name),
+                        name: format!("fuzz_instruction_{name}"),
                         entry_point: entry_point.clone(),
                         harness_code: self
                             .generate_instruction_harness(&entry_point, instruction)?,
@@ -344,7 +341,7 @@ struct FuzzData {{
 
 fuzz_target!(|data: FuzzData| {{
     // Initialize program context
-    // Call the {} instruction with fuzzed data
+    // Call the {instruction_name} instruction with fuzzed data
     // Handle any panics or errors gracefully
     
     // This is a template - you'll need to implement the actual instruction calls
@@ -352,7 +349,7 @@ fuzz_target!(|data: FuzzData| {{
 }});
 
 fn fuzz_instruction_call(data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {{
-    // Comprehensive instruction fuzzing implementation for: {}
+    // Comprehensive instruction fuzzing implementation for: {instruction_name}
     
     // 1. Validate input data to prevent crashes
     if data.is_empty() || data.len() > 1024 * 1024 {{
@@ -372,7 +369,7 @@ fn fuzz_instruction_call(data: &[u8]) -> Result<(), Box<dyn std::error::Error>> 
         }}
     }}
     
-    // 4. Call the {} instruction with proper error handling
+    // 4. Call the {instruction_name} instruction with proper error handling
     match simulate_instruction_execution(instruction_data, &test_accounts) {{
         Ok(_) => Ok(()),
         Err(e) => {{
@@ -402,8 +399,7 @@ fn simulate_instruction_execution(
     // Simulate successful execution
     Ok(())
 }}
-"#,
-            instruction_name, instruction_name, instruction_name
+"#
         );
 
         Ok(harness)
