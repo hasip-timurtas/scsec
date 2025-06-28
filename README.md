@@ -13,7 +13,7 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 - [Why solsec?](#-why-solsec)
 - [Features](#-features)
 - [Built-in Security Rules](#-built-in-security-rules)
-- [Security Checks Reference](SECURITY_CHECKS.md)
+- [Security Checks Reference](docs/SECURITY_CHECKS.md)
 - [Quick Start](#-quick-start)
 - [Commands](#-commands)
 - [Configuration](#-configuration)
@@ -24,6 +24,8 @@ A comprehensive security analysis tool for Solana smart contracts that helps dev
 - [Examples](#-examples)
 - [Performance & Accuracy](#-performance--accuracy)
 - [Community](#-community)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Changelog](docs/CHANGELOG.md)
 - [License](#-license)
 
 ## 🎯 Why solsec?
@@ -239,7 +241,7 @@ required_for_instructions = ["transfer", "withdraw"]
 - ✅ **Zero False Positives**: Filters out comments, strings, and non-code patterns
 - ✅ **Comprehensive Coverage**: 39 total security issues identified across all severity levels
 
-> 📖 **For detailed information about each security check, including code examples and best practices, see the [Security Checks Reference](SECURITY_CHECKS.md).**
+> 📖 **For detailed information about each security check, including code examples and best practices, see the [Security Checks Reference](docs/SECURITY_CHECKS.md).**
 
 ## 🔌 Plugin Development
 
@@ -464,11 +466,19 @@ cargo test
 
 ### Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Please see our comprehensive [Contributing Guide](docs/CONTRIBUTING.md) for detailed instructions on:
+
+- **Development Setup**: Fork, clone, and build the project
+- **Code Quality Standards**: Clippy compliance and formatting requirements  
+- **Testing Requirements**: Running `./scripts/run-tests.sh` before submission
+- **Pre-commit Hooks**: Native git hooks for quality assurance
+- **Security Rule Development**: Creating custom vulnerability detection rules
+- **Submission Guidelines**: Pull request process and commit message format
+
+Quick start for contributors:
+1. Fork the repository and create a feature branch
+2. Run `./scripts/run-tests.sh` to ensure all checks pass
+3. Submit a pull request with clear description of changes
 
 ## 📚 Examples
 
