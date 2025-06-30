@@ -119,6 +119,49 @@ solsec scan ./my-program --no-open
 solsec fuzz ./my-solana-program --timeout 300
 ```
 
+## 📚 Library Usage
+
+**New in v0.2.1**: solsec can now be used as a library dependency in your Rust projects for programmatic security analysis.
+
+### Adding solsec as a Dependency
+
+```toml
+[dependencies]
+solsec = "0.2.1"
+```
+
+### Basic Library Usage
+
+```rust
+use solsec::{StaticAnalyzer, ReportGenerator, ReportFormat};
+use std::path::Path;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Create analyzer
+    let mut analyzer = StaticAnalyzer::new(None)?;
+    
+    // Analyze your code
+    let results = analyzer.analyze_path(Path::new("./src")).await?;
+    
+    // Generate reports
+    let generator = ReportGenerator::new();
+    generator.generate_report(&results, Path::new("report.json"), ReportFormat::Json).await?;
+    generator.generate_report(&results, Path::new("report.html"), ReportFormat::Html).await?;
+    
+    println!("Found {} security issues", results.len());
+    Ok(())
+}
+```
+
+### Available Types
+
+- `StaticAnalyzer` - Core security analysis engine
+- `ReportGenerator` - Multi-format report generation
+- `FuzzEngine` - Automated fuzz testing
+- `PluginManager` - Custom rule management
+- `AnalysisResult` - Security issue representation
+
 ## 📖 Commands
 
 ### `solsec scan`
