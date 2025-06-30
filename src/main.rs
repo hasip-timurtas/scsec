@@ -3,13 +3,8 @@ use clap::Parser;
 use env_logger::Env;
 use log::info;
 
-mod analyzer;
-mod cli;
-mod fuzz;
-mod plugin;
-mod report;
-
-use cli::{Cli, Commands};
+// Use the library modules instead of declaring them here
+use solsec::cli::{Cli, Commands};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -36,7 +31,7 @@ async fn main() -> Result<()> {
             no_open,
             fail_on_critical,
         } => {
-            let scan_config = cli::ScanConfig {
+            let scan_config = solsec::cli::ScanConfig {
                 path,
                 config,
                 output,
@@ -46,15 +41,15 @@ async fn main() -> Result<()> {
                 no_open,
                 fail_on_critical,
             };
-            cli::handle_scan_command(scan_config).await
+            solsec::cli::handle_scan_command(scan_config).await
         }
         Commands::Fuzz {
             path,
             timeout,
             jobs,
             output,
-        } => cli::handle_fuzz_command(path, timeout, jobs, output).await,
+        } => solsec::cli::handle_fuzz_command(path, timeout, jobs, output).await,
 
-        Commands::Plugin { action, path } => cli::handle_plugin_command(action, path).await,
+        Commands::Plugin { action, path } => solsec::cli::handle_plugin_command(action, path).await,
     }
 }

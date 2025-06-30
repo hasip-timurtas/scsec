@@ -244,6 +244,12 @@ pub struct IntegerOverflowRule {
     overflow_patterns: Vec<Regex>,
 }
 
+impl Default for IntegerOverflowRule {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl IntegerOverflowRule {
     pub fn new() -> Self {
         let patterns = vec![
@@ -321,7 +327,7 @@ impl Rule for IntegerOverflowRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct MissingSignerCheckRule;
 
 impl MissingSignerCheckRule {
@@ -385,7 +391,7 @@ impl Rule for MissingSignerCheckRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct UncheckedAccountRule;
 
 impl UncheckedAccountRule {
@@ -479,7 +485,7 @@ impl Rule for UncheckedAccountRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ReentrancyRule;
 
 impl ReentrancyRule {
@@ -554,7 +560,7 @@ impl Rule for ReentrancyRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PdaValidationRule;
 
 impl PdaValidationRule {
@@ -619,7 +625,7 @@ impl Rule for PdaValidationRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PrivilegeEscalationRule;
 
 impl PrivilegeEscalationRule {
@@ -694,7 +700,7 @@ impl Rule for PrivilegeEscalationRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct UnsafeArithmeticRule;
 
 impl UnsafeArithmeticRule {
@@ -760,7 +766,7 @@ impl Rule for UnsafeArithmeticRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct InsufficientValidationRule;
 
 impl InsufficientValidationRule {
@@ -834,7 +840,7 @@ impl Rule for InsufficientValidationRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AccountOwnershipRule;
 
 impl AccountOwnershipRule {
@@ -878,7 +884,7 @@ impl Rule for AccountOwnershipRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct LamportManipulationRule;
 
 impl LamportManipulationRule {
@@ -922,7 +928,7 @@ impl Rule for LamportManipulationRule {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ProgramIdValidationRule;
 
 impl ProgramIdValidationRule {
